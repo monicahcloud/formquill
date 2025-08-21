@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import Logo from "../brand/Logo";
 
 export default function Navbar() {
   return (
@@ -8,7 +9,9 @@ export default function Navbar() {
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-gradient shadow-soft">
-              <span className="text-sm font-bold text-white">FQ</span>
+              <span className="text-sm font-bold text-white">
+                <Logo />
+              </span>
             </div>
             <span className="text-xl font-bold">FormQuill</span>
           </div>
