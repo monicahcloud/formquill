@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   applicationName: SITE.name,
   referrer: "origin-when-cross-origin",
   formatDetection: { email: false, address: false, telephone: false },
-  manifest: "/site.webmanifest",
+  manifest: "/manifest.webmanifest",
   openGraph: {
     type: "website",
     url: SITE.url,

@@ -1,8 +1,8 @@
-// app/site.webmanifest/route.ts
+// app/manifest.ts
 import type { MetadataRoute } from "next";
 import { SITE } from "@/lib/site";
 
-export function GET(): MetadataRoute.Manifest {
+export default function manifest(): MetadataRoute.Manifest {
   return {
     name: SITE.name,
     short_name: SITE.name,
