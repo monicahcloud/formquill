@@ -1,26 +1,87 @@
+/* Tailwind v4 */
 @import "tailwindcss";
 
+/* (Optional) animations lib, if you install it later
+@plugin "tailwindcss-animate";
+*/
+
+/* Fonts */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --font-geist-sans: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial,
+    sans-serif;
+  --font-geist-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", monospace;
+
+  /* shadcn/ui tokens — Palette A (Indigo/Cyan) */
+  --background: 0 0% 100%;
+  --foreground: 222 47% 11%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
+
+  /* Indigo #6B4EFF ≈ hsl(250 100% 65%) */
+  --primary: 250 100% 65%;
+  --primary-foreground: 0 0% 100%;
+
+  /* Cyan #06B6D4 ≈ hsl(189 94% 43%) */
+  --accent: 189 94% 43%;
+  --accent-foreground: 0 0% 100%;
+
+  --secondary: 210 40% 96%;
+  --secondary-foreground: 222 47% 11%;
+
+  --muted: 210 40% 96%;
+  --muted-foreground: 215 20% 50%;
+
+  --border: 214 32% 91%;
+  --input: 214 32% 91%;
+  --ring: 250 100% 65%;
+
+  --radius: 1rem;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Palette B (Violet/Teal) — toggle by adding class `theme-b` on <body> */
+.theme-b {
+  --foreground: 215 25% 27%;
+  --primary: 263 70% 50%; /* #6D28D9 */
+  --accent: 173 80% 40%; /* #14B8A6 */
+  --secondary: 210 40% 96%;
+  --secondary-foreground: 215 25% 27%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215 20% 50%;
+  --border: 214 32% 91%;
+  --input: 214 32% 91%;
+  --ring: 263 70% 50%;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Dark mode (add class `dark` on <html> or <body>) */
+.dark {
+  --background: 222 50% 6%;
+  --foreground: 210 40% 96%;
+  --card: 222 50% 8%;
+  --card-foreground: 210 40% 96%;
+  --popover: 222 50% 8%;
+  --popover-foreground: 210 40% 96%;
+  --primary: 250 100% 70%;
+  --primary-foreground: 222 47% 11%;
+  --accent: 189 94% 48%;
+  --accent-foreground: 222 47% 11%;
+  --secondary: 217 33% 17%;
+  --secondary-foreground: 210 40% 96%;
+  --muted: 217 33% 17%;
+  --muted-foreground: 215 20% 72%;
+  --border: 217 33% 17%;
+  --input: 217 33% 17%;
+  --ring: 250 100% 70%;
 }
 
+/* Base */
+html,
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  height: 100%;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
 }
