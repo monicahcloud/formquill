@@ -69,7 +69,6 @@ export default function RootLayout({
         {/* JSON-LD: Organization + WebSite + SoftwareApplication (SaaS) */}
         <script
           type="application/ld+json"
-          // @ts-expect-error — injecting JSON-LD via dangerouslySetInnerHTML on <script> is intentional
           dangerouslySetInnerHTML={{
             __html: JSON.stringify([
               {
