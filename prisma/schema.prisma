@@ -10,15 +10,20 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+// prisma/schema.prisma
+
 model User {
   id        String   @id @default(uuid())
-  email     String   @unique
+  username  String?  @unique @db.VarChar(32)  // temporarily optional
+  email     String?  @unique @db.VarChar(255) // if currently optional, leave as is
   password  String
   createdAt DateTime @default(now())
 
-  sessions Session[]
-  forms    Form[]    @relation("UserForms")
+  sessions  Session[]
+  forms     Form[]   @relation("UserForms")
 }
+
+
 
 model Session {
   id        String   @id @default(uuid())
