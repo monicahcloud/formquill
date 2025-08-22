@@ -7,7 +7,13 @@ export default function Navbar() {
       <div className="container navbar__inner">
         {/* Brand */}
         <Link href="/" className="row" aria-label="FormQuill (Home)">
-          <Logo />
+          <Logo
+            variant="full"
+            size={65} // icon size
+            className="text-3xl md:text-4xl font-extrabold tracking-tight"
+            gap={6}
+            tighten
+          />
         </Link>
 
         {/* Desktop links */}
@@ -25,7 +31,9 @@ export default function Navbar() {
 
         {/* Right */}
         <div className="flex items-center gap-3">
-          <Link href="/signin" className="btn btn--ghost">
+          <Link
+            href="/signin"
+            className="btn btn--ghost transition-colors hover:!bg-cyan-500 hover:!text-white">
             Sign In
           </Link>
           <Link href="/signup" className="btn btn--primary">

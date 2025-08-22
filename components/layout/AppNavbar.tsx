@@ -44,7 +44,13 @@ export default async function AppNavbar() {
       <div className="container navbar__inner">
         {/* Brand */}
         <Link href="/app" className="row" aria-label="FormQuill (Dashboard)">
-          <Logo variant="full" size={50} gap={0} tighten />
+          <Logo
+            variant="full"
+            size={65} // icon size
+            className="text-3xl md:text-4xl font-extrabold tracking-tight"
+            gap={2}
+            tighten
+          />
         </Link>
 
         {/* Desktop links */}
@@ -54,11 +60,8 @@ export default async function AppNavbar() {
 
         {/* Right (desktop) */}
         <div className="hidden md:flex items-center gap-3">
-          <span className="badge">Pro Plan</span>
-          <Link href="/app/forms/new" className="btn btn--primary">
-            Create
-          </Link>
-          {/* User dropdown (client) */}
+          <span className="badge ">Pro Plan</span>
+
           <UserMenu display={display} initials={initials} onLogout={logout} />
         </div>
 

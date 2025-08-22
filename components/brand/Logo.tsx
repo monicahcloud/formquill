@@ -14,7 +14,7 @@ type Props = {
 
 export default function Logo({
   variant = "full",
-  size = 45,
+  size = 55,
   className,
   title = "FormQuill",
   href,

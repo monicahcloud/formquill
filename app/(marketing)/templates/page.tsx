@@ -11,7 +11,13 @@ export default function TemplatesPage() {
           {/* Left: brand */}
           <div className="row">
             <div className="row">
-              <Logo />
+              <Logo
+                variant="full"
+                size={65} // icon size
+                className="text-3xl md:text-4xl font-extrabold tracking-tight"
+                gap={6}
+                tighten
+              />
             </div>
           </div>
 
