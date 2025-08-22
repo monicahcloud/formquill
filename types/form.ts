@@ -1,3 +1,4 @@
+export type SelectOption = { label: string; value: string };
 export type FieldType =
   | "text"
   | "email"
@@ -10,13 +11,21 @@ export type FieldType =
 
 export type Field = {
   id: string;
-  type: FieldType;
+  type:
+    | "text"
+    | "email"
+    | "tel"
+    | "textarea"
+    | "select"
+    | "radio"
+    | "checkbox"
+    | "date";
   label: string;
-  name: string; // key in submission payload
+  name: string;
   required?: boolean;
   placeholder?: string;
+  options?: { label: string; value: string }[];
   help?: string;
-  options?: { label: string; value: string }[]; // for select/radio/checkbox
 };
 
 export type FormSettings = {
@@ -27,7 +36,9 @@ export type FormSettings = {
 export type FormDTO = {
   id: string;
   title: string;
-  slug: string; // public path: /f/[slug]
+  slug: string;
   fields: Field[];
   settings: FormSettings;
+  createdAt?: string; // use string, not Date, for client components
+  updatedAt?: string;
 };

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+// import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils"; // if you have a cn helper; otherwise remove and inline classNames
 import { ReactNode } from "react";
 

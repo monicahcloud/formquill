@@ -1,26 +1,15 @@
-// app/(auth)/signin/SignInForm.tsx
 "use client";
 
 import { useActionState, useState } from "react";
-
+import type { ActionState } from "./action"; // type-only import is safe
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { User, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
-import Link from "next/link";
 import { useFormStatus } from "react-dom";
-import { ActionState } from "./action";
+import Link from "next/link";
 
-function Field({
-  label,
-  id,
-  name,
-  type = "text",
-  placeholder,
-  leftIcon: LeftIcon,
-  right,
-  required,
-}: {
+function Field(props: {
   label: string;
   id: string;
   name: string;
@@ -30,6 +19,16 @@ function Field({
   right?: React.ReactNode;
   required?: boolean;
 }) {
+  const {
+    label,
+    id,
+    name,
+    type = "text",
+    placeholder,
+    leftIcon: LeftIcon,
+    right,
+    required,
+  } = props;
   return (
     <div className="space-y-2">
       <Label htmlFor={id}>{label}</Label>
@@ -78,7 +77,7 @@ export default function SignInForm({
   action,
   next,
 }: {
-  action: (_: ActionState, fd: FormData) => Promise<ActionState>;
+  action: (_prev: ActionState, fd: FormData) => Promise<ActionState>;
   next?: string;
 }) {
   const [state, formAction] = useActionState(action, { error: undefined });
@@ -86,7 +85,8 @@ export default function SignInForm({
 
   return (
     <form action={formAction} className="space-y-6">
-      <input type="hidden" name="next" value={next ?? "/app"} />
+      <input type="hidden" name="next" value={next ?? ""} />
+
       {state?.error ? (
         <div className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {state.error}

@@ -15,7 +15,7 @@ export default function Error({
 }) {
   useEffect(() => {
     // You can wire this to your logging if desired
-    // eslint-disable-next-line no-console
+
     console.error(error);
   }, [error]);
 

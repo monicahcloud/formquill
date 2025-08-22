@@ -1,71 +1,63 @@
-import { prisma } from "@/lib/prisma";
-import { randomBytes } from "crypto";
+// prisma/seed.ts
+import { PrismaClient } from "@prisma/client";
+import { hashPassword } from "../lib/password"; // adjust path if different
+import { randomUUID } from "node:crypto";
 
-function id() {
-  return crypto.randomUUID();
-}
+const prisma = new PrismaClient();
 
 async function main() {
+  const email = "demo@formquill.com";
+  const username = "demo";
+  const plain = "demo1234"; // sign in with this
+  const password = await hashPassword(plain);
+
+  // make sure user exists
   const user = await prisma.user.upsert({
-    where: { email: "demo@formquill.com" },
-    update: {},
-    create: {
-      email: "demo@formquill.com",
-      password: randomBytes(16).toString("hex"),
-    },
+    where: { email },
+    update: { username },
+    create: { username, email, password },
   });
 
+  // optional: seed a sample form
   await prisma.form.upsert({
-    where: { slug: "salon-intake" },
+    where: { slug: "sample-intake" },
     update: {},
     create: {
+      title: "New Client Intake",
+      slug: "sample-intake",
       ownerId: user.id,
-      title: "Salon Intake",
-      slug: "salon-intake",
       fields: [
         {
-          id: id(),
+          id: randomUUID(),
           type: "text",
-          name: "full_name",
           label: "Full name",
+          name: "full_name",
           required: true,
           placeholder: "Jane Doe",
         },
         {
-          id: id(),
+          id: randomUUID(),
           type: "email",
-          name: "email",
           label: "Email",
+          name: "email",
           required: true,
-        },
-        {
-          id: id(),
-          type: "select",
-          name: "service",
-          label: "Service",
-          required: true,
-          options: [
-            { label: "Highlights", value: "highlights" },
-            { label: "Color", value: "color" },
-            { label: "Cut", value: "cut" },
-          ],
-        },
-        {
-          id: id(),
-          type: "textarea",
-          name: "notes",
-          label: "Notes",
-          placeholder: "Tell us about your hair goals…",
+          placeholder: "you@example.com",
         },
       ],
-      settings: {
-        renderer: "classic",
-        successMessage: "We’ll get back to you shortly ✨",
-      },
+      settings: { renderer: "classic" }, // matches your FormSettings
     },
   });
 
-  console.log("Seeded /forms/salon-intake");
+  // eslint-disable-next-line no-console
+  console.log("Seeded demo user:", { email, username, password: plain });
 }
 
-main().finally(() => prisma.$disconnect());
+main()
+  .catch((e) => {
+    // eslint-disable-next-line no-console
+    console.error(e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
