@@ -1,3 +1,4 @@
+// app/layout.tsx
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -10,14 +11,21 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+/** Ensure SITE.url has a scheme for new URL(...) */
+function normalizeUrl(u?: string) {
+  if (!u || typeof u !== "string") return "http://localhost:3000";
+  return /^https?:\/\//i.test(u) ? u : `https://${u}`;
+}
+const baseUrl = normalizeUrl(SITE.url);
+
 export const metadata: Metadata = {
-  metadataBase: new URL(SITE.url),
+  metadataBase: new URL(baseUrl),
   title: {
-    default: `${SITE.name} — ${SITE.taglines[0]}`,
+    default: `${SITE.name} — ${SITE.taglines?.[0] ?? "Build forms fast"}`,
     template: `%s — ${SITE.name}`,
   },
   description: SITE.description,
-  keywords: SITE.keywords,
+  keywords: [...SITE.keywords],
   alternates: { canonical: "/" },
   applicationName: SITE.name,
   referrer: "origin-when-cross-origin",
@@ -25,7 +33,7 @@ export const metadata: Metadata = {
   manifest: "/manifest.webmanifest",
   openGraph: {
     type: "website",
-    url: SITE.url,
+    url: baseUrl,
     title: SITE.name,
     description: SITE.description,
     siteName: SITE.name,
@@ -33,7 +41,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    creator: SITE.twitter || undefined, // include only if you have one
+    creator: SITE.twitter || undefined,
     title: SITE.name,
     description: SITE.description,
     images: [SITE.ogImage],
@@ -61,13 +69,11 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Simple theme/palette toggles via body classes:
-  // - "dark" for dark mode; "theme-b" for Palette B (optional)
   return (
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased theme-a`}>
-        {/* JSON-LD: Organization + WebSite + SoftwareApplication (SaaS) */}
+        {/* JSON-LD */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -76,17 +82,17 @@ export default function RootLayout({
                 "@context": "https://schema.org",
                 "@type": "Organization",
                 name: SITE.name,
-                url: SITE.url,
-                logo: `${SITE.url}/icon.svg`,
+                url: baseUrl,
+                logo: `${baseUrl}/icon.svg`,
               },
               {
                 "@context": "https://schema.org",
                 "@type": "WebSite",
                 name: SITE.name,
-                url: SITE.url,
+                url: baseUrl,
                 potentialAction: {
                   "@type": "SearchAction",
-                  target: `${SITE.url}/search?q={query}`,
+                  target: `${baseUrl}/search?q={query}`,
                   "query-input": "required name=query",
                 },
               },
@@ -102,7 +108,7 @@ export default function RootLayout({
             ]),
           }}
         />
-        <Toaster />
+        <Toaster richColors position="top-right" />
         {children}
       </body>
     </html>
