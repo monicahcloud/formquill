@@ -8,15 +8,6 @@ export default function Navbar() {
         {/* Brand */}
         <Link href="/" className="row" aria-label="FormQuill (Home)">
           <Logo />
-          <strong
-            style={{
-              backgroundImage: "var(--gradient-hero)",
-              WebkitBackgroundClip: "text",
-              backgroundClip: "text",
-              color: "transparent",
-            }}>
-            FormQuill
-          </strong>
         </Link>
 
         {/* Desktop links */}

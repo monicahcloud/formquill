@@ -1,127 +1,58 @@
+// components/brand/Logo.tsx
 import Link from "next/link";
+import Image from "next/image";
 
 type Props = {
   variant?: "mark" | "full";
-  size?: number; // pixels
+  size?: number; // pixel size for the icon
   className?: string;
-  title?: string;
-  /** When provided, wraps the logo in a Next.js <Link> */
+  title?: string; // accessible label
   href?: string; // e.g. "/" or "/app"
+  gap?: number; // px space between icon and text (default 4)
+  tighten?: boolean; // pull text slightly left to counter PNG padding
 };
 
 export default function Logo({
-  variant = "mark",
-  size = 28,
+  variant = "full",
+  size = 45,
   className,
   title = "FormQuill",
   href,
+  gap = 4,
+  tighten = true,
 }: Props) {
-  const Mark = (
-    <svg
+  const mark = (
+    <Image
+      src="/logo.png"
+      alt={title}
       width={size}
       height={size}
-      viewBox="0 0 24 24"
-      role="img"
-      aria-label={title}
-      className={className}>
-      <defs>
-        <linearGradient id="fqGradReact" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="hsl(var(--primary, 252 100% 66%))" />
-          <stop offset="100%" stopColor="hsl(var(--accent, 189 94% 43%))" />
-        </linearGradient>
-        <mask id="fqMaskReact">
-          <polygon points="12,2 22,12 12,22 2,12" fill="white" />
-          <circle cx="12" cy="12" r="2.5" fill="black" />
-          <path
-            d="M8.2 12.1l2.4 2.4 5.6-5.6"
-            stroke="black"
-            strokeWidth="2.6"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </mask>
-      </defs>
-      <circle cx="12" cy="12" r="10.5" fill="url(#fqGradReact)" opacity=".08" />
-      <rect
-        x="2"
-        y="2"
-        width="20"
-        height="20"
-        fill="url(#fqGradReact)"
-        mask="url(#fqMaskReact)"
-        rx="4"
-        ry="4"
-      />
-    </svg>
+      priority={false}
+      className={className}
+    />
   );
 
-  const Full = (
-    <div
-      className={className}
-      style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
-      {/* inner mark (not a link itself) */}
-      <svg
-        width={size}
-        height={size}
-        viewBox="0 0 24 24"
-        role="img"
-        aria-label={title}>
-        <defs>
-          <linearGradient id="fqGradReact" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="hsl(var(--primary, 252 100% 66%))" />
-            <stop offset="100%" stopColor="hsl(var(--accent, 189 94% 43%))" />
-          </linearGradient>
-          <mask id="fqMaskReactFull">
-            <polygon points="12,2 22,12 12,22 2,12" fill="white" />
-            <circle cx="12" cy="12" r="2.5" fill="black" />
-            <path
-              d="M8.2 12.1l2.4 2.4 5.6-5.6"
-              stroke="black"
-              strokeWidth="2.6"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </mask>
-        </defs>
-        <circle
-          cx="12"
-          cy="12"
-          r="10.5"
-          fill="url(#fqGradReact)"
-          opacity=".08"
-        />
-        <rect
-          x="2"
-          y="2"
-          width="20"
-          height="20"
-          fill="url(#fqGradReact)"
-          mask="url(#fqMaskReactFull)"
-          rx="4"
-          ry="4"
-        />
-      </svg>
-      <span
+  const full = (
+    <span
+      className={`inline-flex items-center ${className ?? ""}`}
+      style={{ columnGap: gap }} // control spacing precisely
+    >
+      {mark}
+      <strong
+        className={tighten ? "-ml-1" : undefined} // nudge text ~4px closer
         style={{
-          fontWeight: 800,
-          fontSize: Math.round(size * 0.9),
-          backgroundImage:
-            "linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%)",
+          backgroundImage: "var(--gradient-hero)",
           WebkitBackgroundClip: "text",
           backgroundClip: "text",
           color: "transparent",
           lineHeight: 1,
-          letterSpacing: 0.2,
-          fontFamily:
-            "Inter, Geist, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif",
-        }}
-        aria-label={title}>
+        }}>
         FormQuill
-      </span>
-    </div>
+      </strong>
+    </span>
   );
 
-  const content = variant === "mark" ? Mark : Full;
+  const content = variant === "mark" ? mark : full;
 
   return href ? (
     <Link href={href} aria-label={title} className="inline-flex items-center">

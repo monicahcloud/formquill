@@ -44,16 +44,7 @@ export default async function AppNavbar() {
       <div className="container navbar__inner">
         {/* Brand */}
         <Link href="/app" className="row" aria-label="FormQuill (Dashboard)">
-          <Logo />
-          <strong
-            style={{
-              backgroundImage: "var(--gradient-hero)",
-              WebkitBackgroundClip: "text",
-              backgroundClip: "text",
-              color: "transparent",
-            }}>
-            FormQuill
-          </strong>
+          <Logo variant="full" size={50} gap={0} tighten />
         </Link>
 
         {/* Desktop links */}

@@ -12,15 +12,6 @@ export default function TemplatesPage() {
           <div className="row">
             <div className="row">
               <Logo />
-              <strong
-                style={{
-                  backgroundImage: "var(--gradient-hero)",
-                  WebkitBackgroundClip: "text",
-                  backgroundClip: "text",
-                  color: "transparent",
-                }}>
-                FormQuill
-              </strong>
             </div>
           </div>
 
