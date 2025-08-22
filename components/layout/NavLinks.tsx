@@ -1,9 +1,7 @@
-// components/layout/NavLinks.tsx
 "use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils"; // if you have it; otherwise replace cn(...) with a template string
 
 type LinkItem = { href: string; label: string };
 
@@ -19,10 +17,7 @@ export default function NavLinks({ links }: { links: LinkItem[] }) {
           <Link
             key={l.href}
             href={l.href}
-            className={cn(
-              "text-sm text-muted-foreground transition-colors hover:text-foreground",
-              active && "text-foreground"
-            )}>
+            className={`navlink ${active ? "navlink--active" : ""}`}>
             {l.label}
           </Link>
         );

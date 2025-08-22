@@ -1,12 +1,19 @@
-// app/(auth)/signup/SignUpForm.tsx
 "use client";
 
 import { useActionState, useState } from "react";
-import { ActionState } from "./actions";
+import type { ActionState } from "./actions";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Mail, User, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
+import {
+  Mail,
+  User,
+  Lock,
+  Eye,
+  EyeOff,
+  Loader2,
+  AlertCircle,
+} from "lucide-react";
 import Link from "next/link";
 import { useFormStatus } from "react-dom";
 
@@ -31,7 +38,9 @@ function Field({
 }) {
   return (
     <div className="space-y-2">
-      <Label htmlFor={id}>{label}</Label>
+      <Label htmlFor={id} className="text-[0.85rem] text-foreground">
+        {label}
+      </Label>
       <div className="relative">
         {LeftIcon ? (
           <LeftIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -93,14 +102,18 @@ export default function SignUpForm({
   const [state, formAction] = useActionState(action, { error: undefined });
   const [showPw, setShowPw] = useState(false);
   const [pw, setPw] = useState("");
-  const s = strength(pw);
+
+  const s = strength(pw); // 0–4
+  const labels = ["Very weak", "Weak", "Okay", "Good", "Strong"];
 
   return (
-    <form action={formAction} className="space-y-6">
+    <form action={formAction} className="mx-auto w-full max-w-sm space-y-6">
       <input type="hidden" name="next" value={next ?? "/app"} />
+
       {state?.error ? (
-        <div className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          {state.error}
+        <div className="flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          <AlertCircle className="mt-[1px] h-4 w-4" />
+          <span className="leading-5">{state.error}</span>
         </div>
       ) : null}
 
@@ -124,7 +137,9 @@ export default function SignUpForm({
       />
 
       <div className="space-y-2">
-        <Label htmlFor="password">Password</Label>
+        <Label htmlFor="password" className="text-[0.85rem] text-foreground">
+          Password
+        </Label>
         <div className="relative">
           <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -135,6 +150,7 @@ export default function SignUpForm({
             required
             className="pl-9 pr-10"
             onChange={(e) => setPw(e.currentTarget.value)}
+            aria-describedby="pw-help pw-strength"
           />
           <button
             type="button"
@@ -149,13 +165,22 @@ export default function SignUpForm({
           </button>
         </div>
 
-        <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-muted">
-          <div
-            className="h-full bg-[hsl(var(--accent))] transition-all"
-            style={{ width: `${(s / 4) * 100}%` }}
-          />
+        {/* strength bar + label */}
+        <div className="space-y-1">
+          <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-muted">
+            <div
+              className="h-full bg-[hsl(var(--accent))] transition-all"
+              style={{ width: `${(s / 4) * 100}%` }}
+              id="pw-strength"
+              aria-hidden
+            />
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            {pw ? labels[s] : " "}
+          </p>
         </div>
-        <p className="text-xs text-muted-foreground">
+
+        <p id="pw-help" className="text-xs text-muted-foreground">
           Use at least 8 characters. Stronger with upper/lowercase, numbers &
           symbols.
         </p>

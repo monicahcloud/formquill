@@ -7,10 +7,10 @@ export const runtime = "nodejs";
 
 export default async function SignUpPage() {
   return (
-    <main className="mx-auto flex min-h-[calc(100vh-56px)] max-w-md items-center px-6 py-16">
-      <div className="w-full">
-        <div className="mb-6">
-          <div className="mb-3 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs text-muted-foreground">
+    <main className="min-h-[calc(100vh-56px)] px-6 py-16 flex items-center justify-center">
+      <div className="w-full max-w-md">
+        <div className="mb-6 text-center">
+          <div className="mb-3 inline-flex items-center justify-center gap-2 rounded-full border px-3 py-1 text-xs text-muted-foreground">
             <span className="h-2 w-2 rounded-full bg-[hsl(var(--accent))]" />
             3-day free trial
           </div>

@@ -1,37 +1,35 @@
+// app/(auth)/signin/page.tsx (server)
 import { Card, CardContent } from "@/components/ui/card";
-import Link from "next/link";
-import { signUpAction } from "./action";
-import SignUpForm from "../signup/SignUpForm";
+import SignInForm from "./SignInForm";
+import { signInAction } from "./action"; // your server action
 
-export const runtime = "nodejs";
-
-export default async function SignUpPage() {
+export default function SignInPage() {
   return (
-    <main className="mx-auto flex min-h-[calc(100vh-56px)] max-w-md items-center px-6 py-16">
-      <div className="w-full">
-        <div className="mb-6">
-          <div className="mb-3 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs text-muted-foreground">
+    <main className="grid min-h-[100svh] place-items-center px-6 py-12">
+      <div className="w-full max-w-md">
+        <div className="mb-6 text-center">
+          <div className="mx-auto mb-3 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs text-muted-foreground">
             <span className="h-2 w-2 rounded-full bg-[hsl(var(--accent))]" />
-            3-day free trial
+            Welcome back
           </div>
           <h1 className="text-3xl font-bold tracking-tight">
-            Create your account
+            Sign in to FormQuill
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            No credit card required.
+            Continue where you left off.
           </p>
         </div>
 
         <Card className="border border-border/60 shadow-sm">
           <CardContent className="p-6">
-            <SignUpForm action={signUpAction} />
+            <SignInForm action={signInAction} />
             <p className="mt-4 text-center text-sm text-muted-foreground">
-              Already have an account?{" "}
-              <Link
-                href="/signin"
+              New here?{" "}
+              <a
+                href="/signup"
                 className="font-medium text-foreground underline">
-                Sign in
-              </Link>
+                Create an account
+              </a>
             </p>
           </CardContent>
         </Card>

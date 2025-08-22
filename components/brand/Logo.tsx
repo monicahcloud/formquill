@@ -1,8 +1,12 @@
+import Link from "next/link";
+
 type Props = {
   variant?: "mark" | "full";
   size?: number; // pixels
   className?: string;
   title?: string;
+  /** When provided, wraps the logo in a Next.js <Link> */
+  href?: string; // e.g. "/" or "/app"
 };
 
 export default function Logo({
@@ -10,22 +14,64 @@ export default function Logo({
   size = 28,
   className,
   title = "FormQuill",
+  href,
 }: Props) {
-  if (variant === "mark") {
-    return (
+  const Mark = (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      role="img"
+      aria-label={title}
+      className={className}>
+      <defs>
+        <linearGradient id="fqGradReact" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="hsl(var(--primary, 252 100% 66%))" />
+          <stop offset="100%" stopColor="hsl(var(--accent, 189 94% 43%))" />
+        </linearGradient>
+        <mask id="fqMaskReact">
+          <polygon points="12,2 22,12 12,22 2,12" fill="white" />
+          <circle cx="12" cy="12" r="2.5" fill="black" />
+          <path
+            d="M8.2 12.1l2.4 2.4 5.6-5.6"
+            stroke="black"
+            strokeWidth="2.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </mask>
+      </defs>
+      <circle cx="12" cy="12" r="10.5" fill="url(#fqGradReact)" opacity=".08" />
+      <rect
+        x="2"
+        y="2"
+        width="20"
+        height="20"
+        fill="url(#fqGradReact)"
+        mask="url(#fqMaskReact)"
+        rx="4"
+        ry="4"
+      />
+    </svg>
+  );
+
+  const Full = (
+    <div
+      className={className}
+      style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
+      {/* inner mark (not a link itself) */}
       <svg
         width={size}
         height={size}
         viewBox="0 0 24 24"
         role="img"
-        aria-label={title}
-        className={className}>
+        aria-label={title}>
         <defs>
           <linearGradient id="fqGradReact" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0%" stopColor="hsl(var(--primary, 252 100% 66%))" />
             <stop offset="100%" stopColor="hsl(var(--accent, 189 94% 43%))" />
           </linearGradient>
-          <mask id="fqMaskReact">
+          <mask id="fqMaskReactFull">
             <polygon points="12,2 22,12 12,22 2,12" fill="white" />
             <circle cx="12" cy="12" r="2.5" fill="black" />
             <path
@@ -50,20 +96,11 @@ export default function Logo({
           width="20"
           height="20"
           fill="url(#fqGradReact)"
-          mask="url(#fqMaskReact)"
+          mask="url(#fqMaskReactFull)"
           rx="4"
           ry="4"
         />
       </svg>
-    );
-  }
-
-  // full wordmark
-  return (
-    <div
-      className={className}
-      style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
-      <Logo variant="mark" size={size} />
       <span
         style={{
           fontWeight: 800,
@@ -82,5 +119,15 @@ export default function Logo({
         FormQuill
       </span>
     </div>
+  );
+
+  const content = variant === "mark" ? Mark : Full;
+
+  return href ? (
+    <Link href={href} aria-label={title} className="inline-flex items-center">
+      {content}
+    </Link>
+  ) : (
+    content
   );
 }

@@ -1,11 +1,11 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import type { ActionState } from "./action"; // type-only import is safe
+import type { ActionState } from "./action";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { User, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
+import { User, Lock, Eye, EyeOff, Loader2, AlertCircle } from "lucide-react";
 import { useFormStatus } from "react-dom";
 import Link from "next/link";
 
@@ -29,9 +29,12 @@ function Field(props: {
     right,
     required,
   } = props;
+
   return (
     <div className="space-y-2">
-      <Label htmlFor={id}>{label}</Label>
+      <Label htmlFor={id} className="text-[0.85rem] text-foreground">
+        {label}
+      </Label>
       <div className="relative">
         {LeftIcon ? (
           <LeftIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -84,12 +87,13 @@ export default function SignInForm({
   const [showPw, setShowPw] = useState(false);
 
   return (
-    <form action={formAction} className="space-y-6">
+    <form action={formAction} className="mx-auto w-full max-w-sm space-y-6">
       <input type="hidden" name="next" value={next ?? ""} />
 
       {state?.error ? (
-        <div className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          {state.error}
+        <div className="flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          <AlertCircle className="mt-[1px] h-4 w-4" />
+          <span className="leading-5">{state.error}</span>
         </div>
       ) : null}
 
@@ -103,7 +107,9 @@ export default function SignInForm({
       />
 
       <div className="space-y-2">
-        <Label htmlFor="password">Password</Label>
+        <Label htmlFor="password" className="text-[0.85rem] text-foreground">
+          Password
+        </Label>
         <div className="relative">
           <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input

@@ -1,22 +1,28 @@
-/* Tailwind v4 */
+/* =========================
+   Tailwind v4 (required)
+   ========================= */
 @import "tailwindcss";
-
-/* (Optional) animations lib, if you install it later
+/* If you add the plugin later:
 @plugin "tailwindcss-animate";
 */
 
-/* Fonts */
+/* =========================
+   Tokens (Light + Dark)
+   ========================= */
 :root {
   --font-geist-sans: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial,
     sans-serif;
   --font-geist-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
     "Liberation Mono", monospace;
+
+  /* Base brand gradient */
   --brand-gradient: linear-gradient(
     135deg,
     hsl(var(--primary)) 0%,
     hsl(var(--accent)) 100%
   );
-  /* shadcn/ui tokens — Palette A (Indigo/Cyan) */
+
+  /* Palette A (Indigo/Cyan) */
   --background: 0 0% 100%;
   --foreground: 222 47% 11%;
 
@@ -26,11 +32,13 @@
   --popover: 0 0% 100%;
   --popover-foreground: 222 47% 11%;
 
-  /* Indigo #6B4EFF ≈ hsl(250 100% 65%) */
-  --primary: 250 100% 65%;
+  /* Indigo */
+  --primary: 250 89% 66%;
   --primary-foreground: 0 0% 100%;
+  /* Extra for effects/gradients */
+  --primary-glow: 250 89% 76%;
 
-  /* Cyan #06B6D4 ≈ hsl(189 94% 43%) */
+  /* Cyan */
   --accent: 189 94% 43%;
   --accent-foreground: 0 0% 100%;
 
@@ -45,13 +53,30 @@
   --ring: 250 100% 65%;
 
   --radius: 1rem;
+
+  /* Extra design tokens used by components below */
+  --gradient-primary: linear-gradient(
+    135deg,
+    hsl(var(--primary)),
+    hsl(var(--primary-glow))
+  );
+  --gradient-hero: linear-gradient(
+    135deg,
+    hsl(var(--primary)),
+    hsl(var(--accent))
+  );
+  --gradient-card: linear-gradient(180deg, hsl(var(--card)), hsl(215 20% 98%));
+
+  --shadow-soft: 0 2px 8px -2px hsl(var(--primary) / 0.1);
+  --shadow-medium: 0 8px 24px -8px hsl(var(--primary) / 0.15);
+  --shadow-strong: 0 16px 48px -16px hsl(var(--primary) / 0.22);
 }
 
-/* Palette B (Violet/Teal) — toggle by adding class `theme-b` on <body> */
+/* Optional alt theme (Palette B) — toggle by adding `theme-b` on <body> */
 .theme-b {
   --foreground: 215 25% 27%;
-  --primary: 263 70% 50%; /* #6D28D9 */
-  --accent: 173 80% 40%; /* #14B8A6 */
+  --primary: 263 70% 50%; /* violet */
+  --accent: 173 80% 40%; /* teal  */
   --secondary: 210 40% 96%;
   --secondary-foreground: 215 25% 27%;
   --muted: 210 40% 96%;
@@ -61,7 +86,7 @@
   --ring: 263 70% 50%;
 }
 
-/* Dark mode (add class `dark` on <html> or <body>) */
+/* Dark mode (class) */
 .dark {
   --background: 222 50% 6%;
   --foreground: 210 40% 96%;
@@ -69,52 +94,84 @@
   --card-foreground: 210 40% 96%;
   --popover: 222 50% 8%;
   --popover-foreground: 210 40% 96%;
+
   --primary: 250 100% 70%;
   --primary-foreground: 222 47% 11%;
+  --primary-glow: 250 100% 78%;
+
   --accent: 189 94% 48%;
   --accent-foreground: 222 47% 11%;
+
   --secondary: 217 33% 17%;
   --secondary-foreground: 210 40% 96%;
+
   --muted: 217 33% 17%;
   --muted-foreground: 215 20% 72%;
+
   --border: 217 33% 17%;
   --input: 217 33% 17%;
   --ring: 250 100% 70%;
+
+  /* keep gradients/shadows consistent */
+  --gradient-primary: linear-gradient(
+    135deg,
+    hsl(var(--primary)),
+    hsl(var(--primary-glow))
+  );
+  --gradient-hero: linear-gradient(
+    135deg,
+    hsl(var(--primary)),
+    hsl(var(--accent))
+  );
+  --gradient-card: linear-gradient(180deg, hsl(var(--card)), hsl(220 18% 11%));
+
+  --shadow-soft: 0 2px 8px -2px hsl(var(--primary) / 0.18);
+  --shadow-medium: 0 8px 24px -8px hsl(var(--primary) / 0.22);
+  --shadow-strong: 0 16px 48px -16px hsl(var(--primary) / 0.28);
 }
 
-/* Base */
+/* =========================
+   Base
+   ========================= */
 html,
 body {
   height: 100%;
   background: hsl(var(--background));
   color: hsl(var(--foreground));
+  font-family: var(--font-geist-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
 .text-brand-gradient {
   background: var(--brand-gradient);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
-
 .bg-brand-gradient {
   background-image: var(--brand-gradient);
 }
 
+/* grid dots helper */
 .bg-grid {
   background-image: radial-gradient(hsl(var(--border)) 1px, transparent 1px);
   background-size: 22px 22px;
   background-position: -11px -11px;
 }
 
-/* soft/strong shadows (used on cards/hero) */
+/* shadows */
 .shadow-soft {
-  box-shadow: 0 6px 20px -10px rgba(0, 0, 0, 0.25);
+  box-shadow: var(--shadow-soft);
 }
 .shadow-strong {
   box-shadow: 0 18px 60px -20px rgba(0, 0, 0, 0.45);
-}
-
-/* subtle hover lift on cards */
+} /* keep your legacy strong */
 .card-lift {
   transition: transform 0.25s ease, box-shadow 0.25s ease,
     border-color 0.25s ease;
@@ -124,11 +181,11 @@ body {
   box-shadow: 0 18px 60px -24px rgba(0, 0, 0, 0.35);
 }
 
-/* gentle float for background blobs */
+/* floaty animation */
 @keyframes floaty {
   0%,
   100% {
-    transform: translateY(0px) translateX(0px) scale(1);
+    transform: translateY(0) translateX(0) scale(1);
     opacity: 0.75;
   }
   50% {
@@ -140,13 +197,12 @@ body {
   animation: floaty 8s ease-in-out infinite;
 }
 
-/* glass panel */
+/* glass + gradients + rings */
 .glass {
   background: color-mix(in oklab, white 6%, transparent);
   backdrop-filter: blur(10px);
 }
 
-/* gradient hairline divider */
 .hr-gradient {
   height: 1px;
   background: linear-gradient(
@@ -157,49 +213,28 @@ body {
   );
 }
 
-/* badge glow */
 .badge-glow {
   box-shadow: 0 0 0 4px
     color-mix(in oklab, hsl(var(--primary)) 16%, transparent);
 }
 
-/* gradient-border wrapper */
 .gradient-border {
-  background-image: linear-gradient(
-    135deg,
-    color-mix(in oklab, hsl(var(--primary)) 60%, transparent),
-    color-mix(in oklab, hsl(var(--accent)) 60%, transparent)
-  );
-  padding: 1px;
+  position: relative;
   border-radius: 1rem;
+  padding: 1px; /* hairline */
+  background: linear-gradient(
+    135deg,
+    color-mix(in oklab, hsl(var(--primary)) 20%, transparent),
+    color-mix(in oklab, hsl(var(--accent)) 20%, transparent)
+  );
 }
 
-/* ===== Pretty chips (high-contrast badges) ===== */
-.chip {
-  @apply inline-flex items-center rounded-md px-2.5 py-1 text-sm font-medium;
-  border: 1px solid transparent;
-  line-height: 1.2;
-}
-.chip--accent {
-  color: hsl(var(--accent-foreground));
-  background: color-mix(in oklab, hsl(var(--accent)) 18%, transparent);
-  border-color: color-mix(in oklab, hsl(var(--accent)) 55%, transparent);
-  box-shadow: 0 0 0 4px color-mix(in oklab, hsl(var(--accent)) 16%, transparent);
-}
-.chip--positive {
-  color: #063a20; /* readable on light */
-  background: color-mix(
-    in oklab,
-    hsl(142 70% 45%) 18%,
-    transparent
-  ); /* emerald-ish */
-  border-color: color-mix(in oklab, hsl(142 70% 45%) 55%, transparent);
-}
-.dark .chip--positive {
-  color: white;
+.card-surface {
+  background: color-mix(in oklab, hsl(var(--background)) 94%, transparent);
+  border: 1px solid color-mix(in oklab, hsl(var(--border)) 70%, transparent);
+  backdrop-filter: blur(8px);
 }
 
-/* ===== Crisp gradient ring + gentle glow for cards ===== */
 .ring-gradient {
   position: relative;
   border-radius: 1rem;
@@ -234,37 +269,428 @@ body {
   filter: blur(14px);
 }
 
-/* Optional glass surface */
-.glass {
-  background: color-mix(in oklab, white 6%, transparent);
-  backdrop-filter: blur(10px);
+/* =========================
+   Extra UI (no Tailwind needed)
+   ========================= */
+
+/* Layout helpers */
+.container {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+.section {
+  padding: 2rem 0;
 }
 
-/* Soften the gradient border (keeps the same background vibe) */
-.gradient-border {
+.grid {
+  display: grid;
+  gap: 1rem;
+}
+@media (min-width: 768px) {
+  .grid-md-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1024px) {
+  .grid-lg-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.centered {
+  display: grid;
+  place-items: center;
+}
+.row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.space-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.rounded {
+  border-radius: var(--radius);
+}
+.text-sm {
+  font-size: 0.875rem;
+}
+.text-muted {
+  color: hsl(var(--muted-foreground));
+}
+.mt-1 {
+  margin-top: 0.25rem;
+}
+.mt-2 {
+  margin-top: 0.5rem;
+}
+.mt-3 {
+  margin-top: 0.75rem;
+}
+.mt-4 {
+  margin-top: 1rem;
+}
+.mt-6 {
+  margin-top: 1.5rem;
+}
+.mb-1 {
+  margin-bottom: 0.25rem;
+}
+.mb-2 {
+  margin-bottom: 0.5rem;
+}
+.mb-3 {
+  margin-bottom: 0.75rem;
+}
+.mb-4 {
+  margin-bottom: 1rem;
+}
+.mb-6 {
+  margin-bottom: 1.5rem;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 40px;
+  padding: 0 0.9rem;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.12s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+.btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+.btn--primary {
+  background: var(--gradient-hero);
+  color: #fff;
+  box-shadow: var(--shadow-soft);
+}
+.btn--primary:hover {
+  opacity: 0.95;
+  box-shadow: var(--shadow-medium);
+}
+.btn--secondary {
+  background: hsl(var(--secondary));
+  color: hsl(var(--secondary-foreground));
+  border-color: hsl(var(--border));
+}
+.btn--secondary:hover {
+  background: hsl(var(--muted));
+}
+.btn--outline {
+  background: transparent;
+  color: hsl(var(--foreground));
+  border-color: hsl(var(--border));
+}
+.btn--ghost {
+  background: transparent;
+  color: hsl(var(--foreground));
+}
+
+/* Inputs + labels */
+.input {
+  width: 100%;
+  height: 40px;
+  border-radius: calc(var(--radius) - 2px);
+  border: 1px solid hsl(var(--input));
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  padding: 0 0.75rem;
+  outline: none;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+.input:focus {
+  border-color: hsl(var(--ring));
+  box-shadow: 0 0 0 3px hsl(var(--ring) / 0.2);
+}
+.label {
+  display: inline-block;
+  font-size: 0.875rem;
+  margin-bottom: 0.4rem;
+}
+
+/* Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: 999px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid hsl(var(--border));
+  color: hsl(var(--foreground));
+  background: hsl(var(--secondary));
+}
+.badge--secondary {
+  background: hsl(var(--muted));
+  color: hsl(var(--muted-foreground));
+}
+
+/* “Chip” variants (kept your Tailwind @apply) */
+.chip {
+  @apply inline-flex items-center rounded-md px-2.5 py-1 text-sm font-medium;
+  border: 1px solid transparent;
+  line-height: 1.2;
+}
+.chip--accent {
+  color: hsl(var(--accent-foreground));
+  background: color-mix(in oklab, hsl(var(--accent)) 18%, transparent);
+  border-color: color-mix(in oklab, hsl(var(--accent)) 55%, transparent);
+  box-shadow: 0 0 0 4px color-mix(in oklab, hsl(var(--accent)) 16%, transparent);
+}
+.chip--positive {
+  color: #063a20;
+  background: color-mix(in oklab, hsl(142 70% 45%) 18%, transparent);
+  border-color: color-mix(in oklab, hsl(142 70% 45%) 55%, transparent);
+}
+.dark .chip--positive {
+  color: #fff;
+}
+
+/* Cards */
+.card {
+  background: hsl(var(--card));
+  color: hsl(var(--card-foreground));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+}
+.card__body {
+  padding: 1rem;
+}
+.card--hover:hover {
+  box-shadow: var(--shadow-medium);
+}
+
+/* Navbar */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  border-bottom: 1px solid hsl(var(--border));
+  backdrop-filter: saturate(120%) blur(8px);
+  background: hsl(var(--background) / 0.85);
+}
+.navbar__inner {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.navbar__links {
+  display: none;
+  gap: 0.5rem;
+}
+@media (min-width: 768px) {
+  .navbar__links {
+    display: flex;
+  }
+}
+
+.navlink {
   position: relative;
-  border-radius: 1rem;
-  padding: 1px; /* hairline thickness */
-  background: linear-gradient(
-    135deg,
-    color-mix(in oklab, hsl(var(--primary)) 20%, transparent),
-    color-mix(in oklab, hsl(var(--accent)) 20%, transparent)
-  );
+  padding: 0.4rem 0.75rem;
+  border-radius: 8px;
+  color: hsl(var(--muted-foreground));
+  transition: color 0.15s ease, background 0.15s ease;
+}
+.navlink:hover {
+  color: hsl(var(--foreground));
+}
+.navlink--active {
+  color: hsl(var(--foreground));
+  background: hsl(var(--secondary));
 }
 
-/* Neutral, slightly glassy inner surface with a faint inner border */
-.card-surface {
-  background: color-mix(in oklab, hsl(var(--background)) 94%, transparent);
-  border: 1px solid color-mix(in oklab, hsl(var(--border)) 70%, transparent);
-  backdrop-filter: blur(8px);
+/* Media tile for template cards */
+.media {
+  position: relative;
+  aspect-ratio: 4/3;
+  background: var(--gradient-card);
+  display: grid;
+  place-items: center;
+}
+.media__overlay {
+  position: absolute;
+  inset: 0;
+  background: #0000;
+  transition: background 0.2s ease, opacity 0.2s ease;
+}
+.card:hover .media__overlay {
+  background: #00000020;
+}
+.media__icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 14px;
+  background: hsl(var(--primary) / 0.12);
+  display: grid;
+  place-items: center;
+  color: hsl(var(--primary));
+  margin: 0 auto 0.65rem auto;
+}
+/* ===== Templates page layout ===== */
+.tpl {
+  --tpl-sidebar-w: 260px;
+  --tpl-gap: 2rem;
 }
 
-/* If not already set in your tokens, make sure accent-foreground exists */
-:root {
-  /* Only include these if you don't already have them */
-  /* --accent: 189 94% 43%; */
-  /* --accent-foreground: 0 0% 100%; */ /* readable on accent tints */
+.tpl__header {
+  margin-bottom: 1.5rem;
 }
-.dark {
-  /* --accent-foreground: 222 47% 11%; */ /* readable in dark */
+
+.tpl__layout {
+  display: grid;
+  gap: var(--tpl-gap);
+  grid-template-columns: 1fr; /* mobile: stack */
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .tpl__layout {
+    grid-template-columns: var(--tpl-sidebar-w) minmax(0, 1fr);
+  }
+}
+
+/* Sidebar */
+.tpl__sidebar {
+  position: sticky;
+  top: 80px; /* sit below your sticky navbar (64px) with a little air */
+  align-self: start;
+}
+
+.tpl__filters-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.tpl__filters-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  background: hsl(var(--primary) / 0.12);
+}
+
+.input-icon {
+  position: relative;
+}
+.input-icon svg {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  color: hsl(var(--muted-foreground));
+}
+.input--with-icon {
+  padding-left: 2.25rem;
+}
+
+/* radios with brand accent */
+.tpl__radio {
+  accent-color: hsl(var(--primary));
+}
+
+/* ===== Cards grid ===== */
+.tpl__cards {
+  min-width: 0;
+}
+.tpl__grid {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+@media (min-width: 768px) {
+  .tpl__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1024px) {
+  .tpl__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* ===== Template card ===== */
+.tpl-card {
+  border: 1px solid hsl(var(--border));
+  border-radius: 14px;
+  background: hsl(var(--card));
+  color: hsl(var(--card-foreground));
+  overflow: hidden;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.tpl-card:hover {
+  box-shadow: var(--shadow-medium);
+}
+
+.tpl-card__hero {
+  height: 150px;
+  display: grid;
+  place-items: center;
+  background: hsl(var(--muted));
+}
+.tpl-card__icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 0.5rem;
+  background: hsl(var(--primary) / 0.12);
+  color: hsl(var(--primary));
+  font-size: 24px;
+}
+.tpl-card__title {
+  margin: 0;
+  text-align: center;
+  font-weight: 700;
+}
+
+.tpl-card__meta {
+  border-top: 1px solid hsl(var(--border));
+  padding: 0.75rem 1rem;
+}
+.tpl-card__footer {
+  padding: 0 1rem 1rem 1rem;
+  padding: 1rem;
+  border-top: 1px solid hsl(var(--border));
+  display: flex;
+  justify-content: center; /* <- centers the button */
+  align-items: center;
+}
+
+/* badge variant that matches screenshot */
+.badge--pill {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 999px;
+  background: hsl(var(--secondary));
+  color: hsl(var(--muted-foreground));
+  border: 1px solid hsl(var(--border));
+}
+
+/* full-width primary action like in the mock */
+.btn--full {
+  width: 100%;
 }
