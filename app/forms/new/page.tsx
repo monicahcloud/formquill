@@ -30,18 +30,21 @@ async function createForm(formData: FormData) {
   const form = await prisma.form.create({
     data: {
       ownerId: user.id,
+      createdById: user.id,
       title,
       slug,
       fields: [],
       settings: {
-        renderer,
-        successMessage: "Thanks! We received your response.",
+        create: {
+          renderer,
+          successMessage: "Thanks! We received your response.",
+        },
       },
     },
     select: { id: true, slug: true },
   });
 
-  redirect(`/forms/${form.id}/edit`);
+  redirect(`/app/forms/${form.id}/edit`);
 }
 
 export default async function NewFormPage() {

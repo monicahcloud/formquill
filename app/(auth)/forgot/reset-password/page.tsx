@@ -4,12 +4,12 @@ import { resetPasswordAction } from "./actions";
 
 export const runtime = "nodejs";
 
-export default function ResetPasswordPage({
+export default async function ResetPasswordPage({
   searchParams,
 }: {
-  searchParams: { token?: string };
+  searchParams: Promise<{ token?: string }>;
 }) {
-  const token = searchParams.token ?? "";
+  const { token = "" } = await searchParams;
 
   return (
     <main className="grid min-h-[100svh] place-items-center px-6 py-12">

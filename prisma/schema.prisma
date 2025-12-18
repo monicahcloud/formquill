@@ -78,7 +78,8 @@ model FormSettings {
   // Defaults
   primaryColor    String @default("#0891B2") @db.VarChar(7)
   backgroundColor String @default("#FFFFFF") @db.VarChar(7)
-
+renderer       String @default("classic") @db.VarChar(16) // "classic" | "chat"
+  successMessage String @default("Thanks! We received your response.") @db.Text
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

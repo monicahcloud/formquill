@@ -1,22 +1,35 @@
 // app/(app)/app/forms/[id]/edit/page.tsx
 import { notFound, redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
+import { randomUUID } from "node:crypto";
+import { Prisma } from "@prisma/client";
+
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
-import { revalidatePath } from "next/cache";
 import { slugify } from "@/lib/slug";
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+
 import type { Field } from "@/types/form";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-type FormSettings = { renderer?: "classic" | "chat" };
-function normalizeSettings(v: unknown): FormSettings {
-  if (v && typeof v === "object") return v as FormSettings;
-  return {};
+/**
+ * Your Form.fields is Json in Prisma.
+ * These helpers keep TS happy and avoid accidental non-array shapes.
+ */
+function readFields(value: unknown): Field[] {
+  if (!Array.isArray(value)) return [];
+  return value as Field[];
+}
+
+function writeFields(fields: Field[]): Prisma.InputJsonValue {
+  // Prisma expects InputJsonValue for Json columns
+  return fields as unknown as Prisma.InputJsonValue;
 }
 
 export default async function EditFormPage({
@@ -29,29 +42,41 @@ export default async function EditFormPage({
   const user = await requireUser();
   if (!user) redirect("/signin");
 
-  const form = await prisma.form.findUnique({ where: { id } });
+  // ✅ include settings relation so `form.settings` exists
+  const form = await prisma.form.findUnique({
+    where: { id },
+    include: { settings: true },
+  });
+
   if (!form || form.ownerId !== user.id) notFound();
 
-  const fields = (form.fields ?? []) as Field[];
-  const settings = normalizeSettings(form.settings);
+  const fields = readFields(form.fields);
 
   async function updateMeta(formData: FormData) {
     "use server";
+
     const authed = await requireUser();
     if (!authed) redirect("/signin");
 
-    const id = String(formData.get("id"));
-    const title = String(formData.get("title") ?? "");
-    const slugRaw = String(formData.get("slug") ?? "");
+    const id = String(formData.get("id") ?? "");
+    const title = String(formData.get("title") ?? "").trim();
+    const slugRaw = String(formData.get("slug") ?? "").trim();
     const renderer = String(formData.get("renderer") ?? "classic") as
       | "classic"
       | "chat";
 
-    const existing = await prisma.form.findUnique({ where: { id } });
+    if (!id || !title) throw new Error("Missing required fields.");
+
+    const existing = await prisma.form.findUnique({
+      where: { id },
+      include: { settings: true },
+    });
+
     if (!existing) notFound();
     if (existing.ownerId !== authed.id) throw new Error("Unauthorized");
 
     const nextSlug = slugRaw ? slugify(slugRaw) : existing.slug;
+
     if (nextSlug !== existing.slug) {
       const clash = await prisma.form.findUnique({ where: { slug: nextSlug } });
       if (clash) throw new Error(`Slug "${nextSlug}" is already in use`);
@@ -62,29 +87,47 @@ export default async function EditFormPage({
       data: {
         title,
         slug: nextSlug,
-        settings: { ...(existing.settings as object), renderer },
+        settings: {
+          upsert: {
+            create: {
+              renderer,
+              successMessage:
+                existing.settings?.successMessage ??
+                "Thanks! We received your response.",
+            },
+            update: { renderer },
+          },
+        },
       },
     });
-    revalidatePath(`/forms/${id}/edit`);
+
+    revalidatePath(`/app/forms/${id}/edit`);
   }
 
   async function addField(formData: FormData) {
     "use server";
+
     const authed = await requireUser();
     if (!authed) redirect("/signin");
 
-    const id = String(formData.get("id"));
-    const label = String(formData.get("label") ?? "");
-    const name = String(formData.get("name") ?? "");
+    const id = String(formData.get("id") ?? "");
+    const label = String(formData.get("label") ?? "").trim();
+    const name = String(formData.get("name") ?? "").trim();
     const type = String(formData.get("type") ?? "text") as Field["type"];
     const required = Boolean(formData.get("required"));
 
-    const form = await prisma.form.findUnique({ where: { id } });
-    if (!form) notFound();
-    if (form.ownerId !== authed.id) throw new Error("Unauthorized");
+    if (!id || !label || !name) {
+      throw new Error("Label and name are required.");
+    }
+
+    const existing = await prisma.form.findUnique({ where: { id } });
+    if (!existing) notFound();
+    if (existing.ownerId !== authed.id) throw new Error("Unauthorized");
+
+    const current = readFields(existing.fields);
 
     const newField: Field = {
-      id: crypto.randomUUID(),
+      id: randomUUID(),
       type,
       label,
       name,
@@ -97,43 +140,55 @@ export default async function EditFormPage({
 
     await prisma.form.update({
       where: { id },
-      data: { fields: [...(form.fields as Field[]), newField] },
+      data: { fields: writeFields([...current, newField]) },
     });
 
-    revalidatePath(`/forms/${id}/edit`);
+    revalidatePath(`/app/forms/${id}/edit`);
   }
 
   async function removeField(formData: FormData) {
     "use server";
+
     const authed = await requireUser();
     if (!authed) redirect("/signin");
 
-    const id = String(formData.get("id"));
-    const fieldId = String(formData.get("fieldId"));
+    const id = String(formData.get("id") ?? "");
+    const fieldId = String(formData.get("fieldId") ?? "");
 
-    const form = await prisma.form.findUnique({ where: { id } });
-    if (!form) notFound();
-    if (form.ownerId !== authed.id) throw new Error("Unauthorized");
+    if (!id || !fieldId) return;
 
-    const next = (form.fields as Field[]).filter((f) => f.id !== fieldId);
-    await prisma.form.update({ where: { id }, data: { fields: next } });
-    revalidatePath(`/forms/${id}/edit`);
+    const existing = await prisma.form.findUnique({ where: { id } });
+    if (!existing) notFound();
+    if (existing.ownerId !== authed.id) throw new Error("Unauthorized");
+
+    const current = readFields(existing.fields);
+    const next = current.filter((f) => f.id !== fieldId);
+
+    await prisma.form.update({
+      where: { id },
+      data: { fields: writeFields(next) },
+    });
+
+    revalidatePath(`/app/forms/${id}/edit`);
   }
 
   async function moveField(formData: FormData) {
     "use server";
+
     const authed = await requireUser();
     if (!authed) redirect("/signin");
 
-    const id = String(formData.get("id"));
-    const fieldId = String(formData.get("fieldId"));
+    const id = String(formData.get("id") ?? "");
+    const fieldId = String(formData.get("fieldId") ?? "");
     const dir = Number(formData.get("dir")); // -1 up, +1 down
 
-    const form = await prisma.form.findUnique({ where: { id } });
-    if (!form) notFound();
-    if (form.ownerId !== authed.id) throw new Error("Unauthorized");
+    if (!id || !fieldId || !Number.isFinite(dir)) return;
 
-    const arr = [...(form.fields as Field[])];
+    const existing = await prisma.form.findUnique({ where: { id } });
+    if (!existing) notFound();
+    if (existing.ownerId !== authed.id) throw new Error("Unauthorized");
+
+    const arr = [...readFields(existing.fields)];
     const index = arr.findIndex((f) => f.id === fieldId);
     if (index === -1) return;
 
@@ -141,12 +196,17 @@ export default async function EditFormPage({
     if (swap < 0 || swap >= arr.length) return;
 
     [arr[index], arr[swap]] = [arr[swap], arr[index]];
-    await prisma.form.update({ where: { id }, data: { fields: arr } });
-    revalidatePath(`/forms/${id}/edit`);
+
+    await prisma.form.update({
+      where: { id },
+      data: { fields: writeFields(arr) },
+    });
+
+    revalidatePath(`/app/forms/${id}/edit`);
   }
 
   return (
-    <main className="mx-auto max-w-4xl px-6 py-10 space-y-10">
+    <main className="mx-auto max-w-4xl space-y-10 px-6 py-10">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Edit form</h1>
         <a
@@ -165,6 +225,7 @@ export default async function EditFormPage({
             action={updateMeta}
             className="grid grid-cols-1 gap-6 md:grid-cols-3">
             <input type="hidden" name="id" value={form.id} />
+
             <div className="space-y-2 md:col-span-1">
               <Label htmlFor="title">Title</Label>
               <Input
@@ -174,33 +235,14 @@ export default async function EditFormPage({
                 required
               />
             </div>
+
             <div className="space-y-2 md:col-span-1">
               <Label htmlFor="slug">Slug</Label>
               <Input id="slug" name="slug" defaultValue={form.slug} />
             </div>
-            <div className="space-y-2 md:col-span-1">
-              <Label>Renderer</Label>
-              <div className="flex items-center gap-4 text-sm">
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    name="renderer"
-                    value="classic"
-                    defaultChecked={settings.renderer !== "chat"}
-                  />{" "}
-                  Classic
-                </label>
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    name="renderer"
-                    value="chat"
-                    defaultChecked={settings.renderer === "chat"}
-                  />{" "}
-                  Chat
-                </label>
-              </div>
-            </div>
+
+            <div className="md:col-span-1" />
+
             <div className="md:col-span-3">
               <Button
                 className="bg-brand-gradient hover:opacity-95"
@@ -222,14 +264,17 @@ export default async function EditFormPage({
             action={addField}
             className="grid grid-cols-1 gap-3 md:grid-cols-6">
             <input type="hidden" name="id" value={form.id} />
+
             <div className="space-y-1 md:col-span-2">
               <Label htmlFor="label">Label</Label>
               <Input id="label" name="label" placeholder="Full name" required />
             </div>
+
             <div className="space-y-1 md:col-span-2">
               <Label htmlFor="name">Name</Label>
               <Input id="name" name="name" placeholder="full_name" required />
             </div>
+
             <div className="space-y-1 md:col-span-1">
               <Label htmlFor="type">Type</Label>
               <select
@@ -246,7 +291,8 @@ export default async function EditFormPage({
                 <option value="date">date</option>
               </select>
             </div>
-            <div className="md:col-span-1 flex items-end gap-2">
+
+            <div className="flex items-end gap-2 md:col-span-1">
               <label className="flex items-center gap-2">
                 <input type="checkbox" name="required" />{" "}
                 <span className="text-sm">Required</span>
@@ -278,6 +324,7 @@ export default async function EditFormPage({
                       </div>
                     </div>
                   </div>
+
                   <div className="flex items-center gap-2">
                     {/* move up */}
                     <form action={moveField}>
@@ -288,6 +335,7 @@ export default async function EditFormPage({
                         ↑
                       </Button>
                     </form>
+
                     {/* move down */}
                     <form action={moveField}>
                       <input type="hidden" name="id" value={form.id} />
@@ -300,6 +348,7 @@ export default async function EditFormPage({
                         ↓
                       </Button>
                     </form>
+
                     {/* remove */}
                     <form action={removeField}>
                       <input type="hidden" name="id" value={form.id} />
