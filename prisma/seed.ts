@@ -1,6 +1,6 @@
 // prisma/seed.ts
 import { PrismaClient, Prisma } from "@prisma/client";
-import { hashPassword } from "../lib/password"; // adjust if your path differs
+import { hashPassword } from "../lib/password";
 import { randomUUID } from "node:crypto";
 
 const prisma = new PrismaClient();
@@ -8,17 +8,15 @@ const prisma = new PrismaClient();
 async function main() {
   const email = "demo@formquill.com";
   const username = "demo";
-  const plain = "demo1234"; // sign in with this
+  const plain = "demo1234";
   const password = await hashPassword(plain);
 
-  // 1) Ensure demo user exists
   const user = await prisma.user.upsert({
     where: { email },
     update: { username, password },
     create: { username, email, password },
   });
 
-  // Helper to make a field
   const f = (
     p: Partial<{
       id: string;
@@ -29,7 +27,7 @@ async function main() {
       placeholder?: string;
       options?: string[];
     }>
-  ) => ({
+  ): Prisma.InputJsonObject => ({
     id: p.id ?? randomUUID(),
     type: p.type ?? "text",
     label: p.label ?? "",
@@ -39,17 +37,28 @@ async function main() {
     ...(p.options ? { options: p.options } : {}),
   });
 
-  // 2) Seed a couple public forms you can test
-  const seedForm = async (title: string, slug: string, fields: unknown[]) => {
+  const seedForm = async (
+    title: string,
+    slug: string,
+    fields: Prisma.InputJsonArray
+  ) => {
     await prisma.form.upsert({
       where: { slug },
-      update: {},
+      update: {
+        title,
+        fields, // keep seeded fields updated
+      },
       create: {
         title,
         slug,
         ownerId: user.id,
-        fields: fields as Prisma.InputJsonValue, // 👈 cast JSON
-        settings: { renderer: "classic" } as Prisma.InputJsonValue, // 👈 cast JSON
+        createdById: user.id,
+        fields,
+
+        // Optional: create settings row (defaults apply)
+        settings: {
+          create: {},
+        },
       },
     });
   };
@@ -70,7 +79,7 @@ async function main() {
       placeholder: "you@example.com",
     }),
     f({
-      type: "tel",
+      type: "phone",
       label: "Phone",
       name: "phone",
       required: false,
@@ -105,7 +114,6 @@ async function main() {
   ]);
 
   console.log("Seeded demo user:", { email, username, password: plain });
-
   console.log("Forms:", ["/forms/sample-intake", "/forms/salon-intake"]);
 }
 

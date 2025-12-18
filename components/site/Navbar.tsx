@@ -18,9 +18,9 @@ export default function Navbar() {
 
         {/* Desktop links */}
         <div className="navbar__links">
-          <Link href="/templates" className="navlink">
+          {/* <Link href="/templates" className="navlink">
             Templates
-          </Link>
+          </Link> */}
           <a href="#pricing" className="navlink">
             Pricing
           </a>

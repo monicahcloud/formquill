@@ -4,29 +4,18 @@ import FunnelCard from "@/components/analytics/FunnelCard";
 import BottlenecksCard from "@/components/analytics/BottlenecksCard";
 import TimeSeriesCard from "@/components/analytics/TimeSeriesCard";
 import { Eye, Users, Target, Clock } from "lucide-react";
-import type { FunnelStep, BottleneckItem } from "@/components/analytics/types";
+import { fetchAnalytics } from "../actions/analytics.actions";
+
+function formatMs(ms: number | null) {
+  if (!ms || ms <= 0) return "—";
+  const s = Math.round(ms / 1000);
+  const m = Math.floor(s / 60);
+  const rem = s % 60;
+  return `${m}m ${rem}s`;
+}
 
 export default async function AnalyticsPage() {
-  // mock metrics (replace with real data)
-  const metrics = {
-    views: 2847,
-    starts: 1623,
-    completions: 891,
-    avgTime: "4m 23s",
-  };
-
-  const funnel: FunnelStep[] = [
-    { step: "Form Views", count: 2847, percentage: 100 },
-    { step: "Form Started", count: 1623, percentage: 57 },
-    { step: "Halfway Complete", count: 1247, percentage: 44 },
-    { step: "Form Completed", count: 891, percentage: 31 },
-  ];
-
-  const fieldBottlenecks: BottleneckItem[] = [
-    { field: "Phone Number", dropRate: 23.5, position: "Step 4" },
-    { field: "Address", dropRate: 18.2, position: "Step 7" },
-    { field: "How did you hear about us?", dropRate: 12.8, position: "Step 5" },
-  ];
+  const { metrics, funnel, bottlenecks, series } = await fetchAnalytics();
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-8">
@@ -38,35 +27,51 @@ export default async function AnalyticsPage() {
           icon={Eye}
           label="Views"
           value={metrics.views}
-          trend="+15.2% from last period"
+          trend="All-time"
         />
         <KpiCard
           icon={Users}
           label="Starts"
           value={metrics.starts}
-          trend="+8.7% from last period"
+          trend="All-time"
         />
         <KpiCard
           icon={Target}
           label="Completions"
           value={metrics.completions}
-          trend="-2.1% from last period"
-          tone="warning"
+          trend="All-time"
         />
         <KpiCard
           icon={Clock}
           label="Avg. Time"
-          value={metrics.avgTime}
-          trend="-12s from last period"
+          value={formatMs(metrics.avgTimeMs)}
+          trend={metrics.avgTimeMs ? "Computed from submissions" : "—"}
+          tone={metrics.avgTimeMs ? "success" : "neutral"}
         />
       </div>
 
       <div className="mb-8 grid grid-cols-1 gap-8 lg:grid-cols-2">
         <FunnelCard steps={funnel} />
-        <BottlenecksCard items={fieldBottlenecks} />
+        <BottlenecksCard items={bottlenecks} />
       </div>
 
-      <TimeSeriesCard />
+      <TimeSeriesCard>
+        {/* Replace this with your chart lib; example shows completions over time */}
+        <div className="rounded-lg border p-4 text-sm text-muted-foreground">
+          {series.length === 0 ? (
+            <p>No data yet.</p>
+          ) : (
+            <ul className="grid grid-cols-2 gap-y-1">
+              {series.map((p) => (
+                <li key={p.date} className="flex items-center justify-between">
+                  <span>{p.date}</span>
+                  <span className="tabular-nums">{p.completions}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </TimeSeriesCard>
     </main>
   );
 }

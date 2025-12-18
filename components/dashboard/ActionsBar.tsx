@@ -1,11 +1,14 @@
+// components/dashboard/ActionsBar.tsx
 "use client";
 
-import Link from "next/link";
-import { Sparkles, Plus } from "lucide-react";
+import { Sparkles } from "lucide-react";
+import { cn } from "@/lib/utils";
+import CreateForm from "../forms/CreateForm";
 
-export default function ActionsBar() {
+export default function ActionsBar({ className }: { className?: string }) {
   return (
-    <div className="-mt-4 mb-8 flex flex-wrap gap-3 sm:mt-0 sm:justify-end">
+    <div
+      className={cn("flex flex-wrap items-center gap-3 shrink-0", className)}>
       {/* Secondary */}
       <button
         type="button"
@@ -15,13 +18,7 @@ export default function ActionsBar() {
       </button>
 
       {/* Primary */}
-      <Link
-        href="/app/forms/new"
-        aria-label="Create a new form"
-        className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 active:scale-[0.98]">
-        <Plus className="h-4 w-4" />
-        Create Form
-      </Link>
+      <CreateForm />
     </div>
   );
 }

@@ -4,8 +4,8 @@ type Props = {
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   title: string;
   value: ReactNode;
-  trend: ReactNode;
-  trendTone?: "success" | "warning"; // color accent
+  trend?: ReactNode;
+  trendTone?: "success" | "warning";
 };
 
 export default function KpiCard({
@@ -15,6 +15,11 @@ export default function KpiCard({
   trend,
   trendTone = "success",
 }: Props) {
+  const tone =
+    trendTone === "warning"
+      ? "text-amber-600 dark:text-amber-500"
+      : "text-emerald-600 dark:text-emerald-500";
+
   return (
     <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
       <div className="mb-2 flex items-center gap-2">
@@ -28,15 +33,11 @@ export default function KpiCard({
         {value}
       </div>
 
-      <div
-        className={
-          "mt-1 flex items-center gap-1 text-sm " +
-          (trendTone === "warning"
-            ? "text-emerald-600 dark:text-emerald-500"
-            : "text-emerald-600 dark:text-emerald-500")
-        }>
-        {trend}
-      </div>
+      {trend ? (
+        <div className={`mt-1 flex items-center gap-1 text-sm ${tone}`}>
+          {trend}
+        </div>
+      ) : null}
     </div>
   );
 }

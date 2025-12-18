@@ -61,7 +61,7 @@ export default function Pricing({ features }: { features: string[] }) {
         </div>
 
         <p className="mt-8 text-sm text-muted-foreground">
-          All plans include a 14-day free trial. No credit card required.
+          All plans include a 3-day free trial. No credit card required.
         </p>
       </div>
     </section>
