@@ -1,67 +1,53 @@
-// prisma/schema.prisma
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider  = "postgresql"
+  provider = "postgresql"
 }
 
 model User {
-  id        String   @id @default(uuid())
-  username  String   @unique @db.VarChar(32) // required
-  email     String   @unique @db.VarChar(255) // required
-  password  String // required
-  createdAt DateTime @default(now())
-
-  sessions     Session[]
-  // Owner relation (who owns forms)
-  forms        Form[]    @relation("UserForms")
-  // Creator relation (who created forms)
-  createdForms Form[]    @relation("UserCreatedForms")
-
+  id                  String               @id @default(uuid())
+  username            String               @unique @db.VarChar(32)
+  email               String               @unique @db.VarChar(255)
+  password            String
+  createdAt           DateTime             @default(now())
+  createdForms        Form[]               @relation("UserCreatedForms")
+  forms               Form[]               @relation("UserForms")
   passwordResetTokens PasswordResetToken[]
+  sessions            Session[]
 }
 
 model Session {
   id        String   @id @default(uuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   tokenHash String   @unique
   expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([expiresAt])
 }
 
 model Form {
-  id      String @id @default(uuid())
-  ownerId String
-  owner   User   @relation("UserForms", fields: [ownerId], references: [id], onDelete: Cascade)
-
-  title       String
-  description String @default("")
-  slug        String @unique
-
-  views         Int     @default(0)
-  responseCount Int     @default(0) // renamed from `responses`
-  published     Boolean @default(false)
-
-  fields Json
-
-  // 1:1 back-relation to settings (FK lives on FormSettings)
-  settings FormSettings?
-
-  // submissions and responses
-  formResponses FormResponse[]
-  submissions   Submission[]
-  events        FormEvent[]    @relation("FormEvents")
+  id            String         @id @default(uuid())
+  ownerId       String
+  title         String
+  description   String         @default("")
+  slug          String         @unique
+  views         Int            @default(0)
+  responseCount Int            @default(0)
+  published     Boolean        @default(false)
+  fields        Json
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
-
-  // Creator relation (required as in your last schema)
-  createdById String
-  createdBy   User?  @relation("UserCreatedForms", fields: [createdById], references: [id])
+  createdById   String
+  createdBy     User           @relation("UserCreatedForms", fields: [createdById], references: [id])
+  owner         User           @relation("UserForms", fields: [ownerId], references: [id], onDelete: Cascade)
+  events        FormEvent[]    @relation("FormEvents")
+  formResponses FormResponse[]
+  settings      FormSettings?
+  submissions   Submission[]
 
   @@index([ownerId])
   @@index([slug])
@@ -69,27 +55,23 @@ model Form {
 }
 
 model FormSettings {
-  id String @id @default(uuid())
-
-  // FK here => deleting a Form removes its settings
-  formId String @unique
-  form   Form   @relation(fields: [formId], references: [id], onDelete: Cascade)
-
-  // Defaults
-  primaryColor    String @default("#0891B2") @db.VarChar(7)
-  backgroundColor String @default("#FFFFFF") @db.VarChar(7)
-renderer       String @default("classic") @db.VarChar(16) // "classic" | "chat"
-  successMessage String @default("Thanks! We received your response.") @db.Text
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              String   @id @default(uuid())
+  formId          String   @unique
+  primaryColor    String   @default("#0891B2") @db.VarChar(7)
+  backgroundColor String   @default("#FFFFFF") @db.VarChar(7)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  renderer        String   @default("classic") @db.VarChar(16)
+  successMessage  String   @default("Thanks! We received your response.")
+  form            Form     @relation(fields: [formId], references: [id], onDelete: Cascade)
 }
 
 model FormResponse {
   id           String   @id @default(uuid())
   formId       String
-  form         Form     @relation(fields: [formId], references: [id], onDelete: Cascade)
   formResponse Json
   createdAt    DateTime @default(now())
+  form         Form     @relation(fields: [formId], references: [id], onDelete: Cascade)
 
   @@index([formId, createdAt])
 }
@@ -97,9 +79,9 @@ model FormResponse {
 model Submission {
   id        String   @id @default(uuid())
   formId    String
-  form      Form     @relation(fields: [formId], references: [id], onDelete: Cascade)
   data      Json
   createdAt DateTime @default(now())
+  form      Form     @relation(fields: [formId], references: [id], onDelete: Cascade)
 
   @@index([formId, createdAt])
 }
@@ -107,25 +89,23 @@ model Submission {
 model FormEvent {
   id        String   @id @default(uuid())
   formId    String
-  // rename field to `form` and add explicit relation name to match Form.events
-  form      Form     @relation("FormEvents", fields: [formId], references: [id], onDelete: Cascade)
-  type      String // "view" | "start" | "field_focus" | "field_error" | "abandon" | "complete"
+  type      String
   fieldKey  String?
   meta      Json?
   createdAt DateTime @default(now())
+  form      Form     @relation("FormEvents", fields: [formId], references: [id], onDelete: Cascade)
 
   @@index([formId, type, createdAt])
 }
 
 model PasswordResetToken {
-  id        String   @id @default(uuid())
+  id        String    @id @default(uuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  tokenHash String   @unique
+  tokenHash String    @unique
   expiresAt DateTime
   usedAt    DateTime?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, expiresAt])
   @@index([expiresAt])
