@@ -228,7 +228,7 @@ export default async function EditFormPage({
       </form>
 
       {/* Fields */}
-      <Card className="border border-border/60 shadow-sm">
+      <Card className="border border-border/40 shadow-soft bg-card/80 backdrop-blur-sm">
         <CardContent className="space-y-6 p-6">
           <div>
             <h2 className="text-xl font-semibold">Fields</h2>

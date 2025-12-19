@@ -14,14 +14,14 @@ import {
   CheckSquare,
   Radio as RadioIcon,
 } from "lucide-react";
+
 import FieldPalette from "@/components/form-builder/FieldPalette";
 import Canvas from "@/components/form-builder/Canvas";
 import SettingsPanel from "@/components/form-builder/SettingsPanel";
 import SelectedFieldHint from "@/components/form-builder/SelectedFieldHint";
-import type { FieldType } from "@/components/form-builder/types";
 import TopBar from "@/components/form-builder/TopBar";
+import type { FieldType } from "@/components/form-builder/types";
 
-// Centralized field types
 const fieldTypes: FieldType[] = [
   { type: "text", label: "Text Input", icon: Type },
   { type: "email", label: "Email", icon: Mail },
@@ -41,39 +41,47 @@ export default function NewFormPage() {
   const [selectedField, setSelectedField] = useState<FieldType | null>(null);
   const [isConversational, setIsConversational] = useState(false);
 
+  // ✅ NEW: design state (Phase 1: local UI state)
+  const [heroIcon, setHeroIcon] = useState<string>("✨");
+  const [heroImageUrl, setHeroImageUrl] = useState<string>(""); // empty = use emoji
+
   return (
-    <div className="flex h-[calc(100vh-56px)] flex-col">
+    <div className="min-h-[calc(100svh-64px)] bg-gradient-to-b from-background to-muted/20">
       <TopBar
         formName={formName}
         onNameChange={setFormName}
         isConversational={isConversational}
         onToggleConversational={setIsConversational}
-        onGenerate={() => {
-          /* TODO: open AI modal */
-        }}
-        onPreview={() => {
-          /* TODO */
-        }}
-        onSettings={() => {
-          /* TODO */
-        }}
-        onSave={() => {
-          /* TODO: persist draft */
-        }}
-        onPublish={() => {
-          /* TODO: publish */
-        }}
+        onGenerate={() => {}}
+        onPreview={() => {}}
+        onSettings={() => {}}
+        onSave={() => {}}
+        onPublish={() => {}}
       />
 
       <div className="flex min-h-0 flex-1">
         <FieldPalette fields={fieldTypes} onSelect={setSelectedField} />
 
-        <Canvas formName={formName} isConversational={isConversational} />
+        <Canvas
+          formName={formName}
+          isConversational={isConversational}
+          heroIcon={heroIcon}
+          heroImageUrl={heroImageUrl || undefined}
+        />
 
-        <SettingsPanel />
+        <SettingsPanel
+          heroIcon={heroIcon}
+          heroImageUrl={heroImageUrl}
+          onHeroIconChange={setHeroIcon}
+          onHeroImageUrlChange={setHeroImageUrl}
+        />
       </div>
 
-      {selectedField && <SelectedFieldHint label={selectedField.label} />}
+      {selectedField && (
+        <div className="px-4 pb-6">
+          <SelectedFieldHint label={selectedField.label} />
+        </div>
+      )}
     </div>
   );
 }
