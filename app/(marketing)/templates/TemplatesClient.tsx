@@ -3,12 +3,12 @@
 
 import { useMemo, useState } from "react";
 
-type Template = {
-  id: number;
-  title: string;
-  category: string; // detailed use-case (e.g., "Appointment Booking")
-  industry: string; // detailed sector (e.g., "Healthcare")
-};
+import {
+  MARKETING_TEMPLATES as TEMPLATES,
+  type MarketingTemplate,
+} from "@/lib/templates/marketingTemplates";
+import { createFormFromMarketingTemplate } from "@/app/(app)/app/actions/template.actions";
+// import UseTemplateButton from "./UseTemplateButton";
 
 /* -----------------------------
    Condensed filter choices
@@ -48,365 +48,92 @@ const CATEGORY_FILTERS = [
 --------------------------------------- */
 // Industries
 const INDUSTRY_GROUPS: Record<string, (typeof INDUSTRY_FILTERS)[number]> = {
-  // Health & Wellness
   Healthcare: "Health & Wellness",
   Clinic: "Health & Wellness",
   "Fitness & Wellness": "Health & Wellness",
   "Beauty & Salon": "Health & Wellness",
   "Pet Services": "Health & Wellness",
 
-  // Real Estate & Home
   "Real Estate": "Real Estate & Home",
   Construction: "Real Estate & Home",
   "Home Services": "Real Estate & Home",
 
-  // Finance & Legal
   Finance: "Finance & Legal",
   Insurance: "Finance & Legal",
   Legal: "Finance & Legal",
 
-  // Education
   Education: "Education",
 
-  // IT & SaaS
   "IT / SaaS": "IT & SaaS",
 
-  // Retail & E-commerce
   Retail: "Retail & E-commerce",
   "E-commerce": "Retail & E-commerce",
 
-  // Hospitality & Travel
   Hospitality: "Hospitality & Travel",
   Restaurants: "Hospitality & Travel",
   "Travel & Tourism": "Hospitality & Travel",
 
-  // Nonprofit & Community
   "Nonprofit / Charity": "Nonprofit & Community",
   Church: "Nonprofit & Community",
 
-  // Government & Public Sector
   Government: "Government & Public Sector",
 
-  // Media & Creative
   "Photography & Media": "Media & Creative",
   "Marketing & Agencies": "Media & Creative",
 
-  // Manufacturing & Logistics
   Manufacturing: "Manufacturing & Logistics",
   Logistics: "Manufacturing & Logistics",
   Automotive: "Manufacturing & Logistics",
 
-  // Sports & Events
   "Sports & Recreation": "Sports & Events",
   "Entertainment & Events": "Sports & Events",
 };
 
 // Categories (use-cases)
 const CATEGORY_GROUPS: Record<string, (typeof CATEGORY_FILTERS)[number]> = {
-  // Lead & Contact
   "Lead Capture": "Lead & Contact",
   Contact: "Lead & Contact",
   Referral: "Lead & Contact",
   "Newsletter Signup": "Lead & Contact",
   "Subscription / Waitlist": "Lead & Contact",
 
-  // Intake & Onboarding
   Intake: "Intake & Onboarding",
   Onboarding: "Intake & Onboarding",
 
-  // Appointments & Reservations
   "Appointment Booking": "Appointments & Reservations",
   Reservation: "Appointments & Reservations",
   "Property Viewing": "Appointments & Reservations",
 
-  // Registration & RSVP
   "Event Registration": "Registration & RSVP",
   RSVP: "Registration & RSVP",
 
-  // Applications & Requests
   Application: "Applications & Requests",
   "Maintenance Request": "Applications & Requests",
   "Waiver / Consent": "Applications & Requests",
 
-  // Orders & Quotes
   "Order / Quote Request": "Orders & Quotes",
   "Request for Proposal (RFP)": "Orders & Quotes",
   "Construction Quote": "Orders & Quotes",
   "Shipment Quote": "Orders & Quotes",
 
-  // Support & Issues
   "Support Ticket": "Support & Issues",
   "Bug Report": "Support & Issues",
   "Feature Request": "Support & Issues",
   "Warranty Claim": "Support & Issues",
   "Insurance Claim": "Support & Issues",
 
-  // Feedback & Surveys
   "Feedback / CSAT": "Feedback & Surveys",
   "Survey / Poll": "Feedback & Surveys",
   "Public Feedback": "Feedback & Surveys",
 
-  // Donations & Payments
   Donation: "Donations & Payments",
 
-  // Hiring & HR
   "Job Application": "Hiring & HR",
   "Leave Request": "Hiring & HR",
 };
-
-/* -----------------------------
-   Your full templates list
------------------------------ */
-const TEMPLATES: Template[] = [
-  // Education
-  {
-    id: 1,
-    title: "Student Enrollment",
-    category: "Event Registration",
-    industry: "Education",
-  },
-  {
-    id: 2,
-    title: "Course Feedback Survey",
-    category: "Survey / Poll",
-    industry: "Education",
-  },
-
-  // Healthcare
-  {
-    id: 3,
-    title: "Patient Intake",
-    category: "Intake",
-    industry: "Healthcare",
-  },
-  {
-    id: 4,
-    title: "Telehealth Appointment",
-    category: "Appointment Booking",
-    industry: "Healthcare",
-  },
-
-  // Real Estate
-  {
-    id: 5,
-    title: "Property Viewing",
-    category: "Appointment Booking",
-    industry: "Real Estate",
-  },
-  {
-    id: 6,
-    title: "Home Valuation",
-    category: "Order / Quote Request",
-    industry: "Real Estate",
-  },
-
-  // IT / SaaS
-  {
-    id: 7,
-    title: "Client Onboarding",
-    category: "Onboarding",
-    industry: "IT / SaaS",
-  },
-  { id: 8, title: "Bug Report", category: "Bug Report", industry: "IT / SaaS" },
-  {
-    id: 9,
-    title: "Feature Request",
-    category: "Feature Request",
-    industry: "IT / SaaS",
-  },
-
-  // HR & Recruiting
-  {
-    id: 10,
-    title: "Job Application",
-    category: "Job Application",
-    industry: "HR & Recruiting",
-  },
-  {
-    id: 11,
-    title: "Employee Onboarding",
-    category: "Onboarding",
-    industry: "HR & Recruiting",
-  },
-  {
-    id: 12,
-    title: "Leave Request",
-    category: "Application",
-    industry: "HR & Recruiting",
-  },
-
-  // Legal
-  { id: 13, title: "Legal Intake", category: "Intake", industry: "Legal" },
-  {
-    id: 14,
-    title: "Case Evaluation",
-    category: "Lead Capture",
-    industry: "Legal",
-  },
-
-  // Finance & Insurance
-  {
-    id: 15,
-    title: "Loan Pre-Qualification",
-    category: "Application",
-    industry: "Finance",
-  },
-  {
-    id: 16,
-    title: "Insurance Claim",
-    category: "Support Ticket",
-    industry: "Insurance",
-  },
-
-  // Nonprofit
-  {
-    id: 17,
-    title: "Donation Form",
-    category: "Donation",
-    industry: "Nonprofit / Charity",
-  },
-  {
-    id: 18,
-    title: "Volunteer Signup",
-    category: "Volunteer Signup",
-    industry: "Nonprofit / Charity",
-  },
-
-  // Hospitality / Restaurants / Travel
-  {
-    id: 19,
-    title: "Hotel Booking Request",
-    category: "Reservation",
-    industry: "Hospitality",
-  },
-  {
-    id: 20,
-    title: "Restaurant Reservation",
-    category: "Reservation",
-    industry: "Restaurants",
-  },
-  {
-    id: 21,
-    title: "Travel Inquiry",
-    category: "Lead Capture",
-    industry: "Travel & Tourism",
-  },
-
-  // E-commerce & Manufacturing
-  {
-    id: 22,
-    title: "Product Return Request",
-    category: "Support Ticket",
-    industry: "E-commerce",
-  },
-  {
-    id: 23,
-    title: "Warranty Claim",
-    category: "Support Ticket",
-    industry: "Manufacturing",
-  },
-
-  // Construction & Home Services
-  {
-    id: 24,
-    title: "Construction Quote",
-    category: "Order / Quote Request",
-    industry: "Construction",
-  },
-  {
-    id: 25,
-    title: "Home Service Request",
-    category: "Intake",
-    industry: "Home Services",
-  },
-
-  // Media / Marketing / Events
-  {
-    id: 26,
-    title: "Photography Booking",
-    category: "Appointment Booking",
-    industry: "Photography & Media",
-  },
-  {
-    id: 27,
-    title: "Marketing Project Brief",
-    category: "Intake",
-    industry: "Marketing & Agencies",
-  },
-  {
-    id: 28,
-    title: "Event RSVP",
-    category: "Event Registration",
-    industry: "Entertainment & Events",
-  },
-  {
-    id: 29,
-    title: "Venue Booking Request",
-    category: "Reservation",
-    industry: "Entertainment & Events",
-  },
-
-  // Automotive / Logistics
-  {
-    id: 30,
-    title: "Auto Repair Request",
-    category: "Maintenance Request",
-    industry: "Automotive",
-  },
-  {
-    id: 31,
-    title: "Shipment Quote",
-    category: "Order / Quote Request",
-    industry: "Logistics",
-  },
-
-  // Fitness / Sports / Pets / Beauty
-  {
-    id: 32,
-    title: "Gym Membership Signup",
-    category: "Subscription / Waitlist",
-    industry: "Fitness & Wellness",
-  },
-  {
-    id: 33,
-    title: "Team Tryout Sign-Up",
-    category: "Event Registration",
-    industry: "Sports & Recreation",
-  },
-  {
-    id: 34,
-    title: "Pet Grooming Appointment",
-    category: "Appointment Booking",
-    industry: "Pet Services",
-  },
-  {
-    id: 35,
-    title: "Salon Appointment",
-    category: "Appointment Booking",
-    industry: "Beauty & Salon",
-  },
-
-  // Government & General
-  {
-    id: 36,
-    title: "Public Feedback",
-    category: "Survey / Poll",
-    industry: "Government",
-  },
-  { id: 37, title: "Contact Us", category: "Contact", industry: "IT / SaaS" },
-
-  // Faith communities kept from original
-  {
-    id: 38,
-    title: "Prayer Request Form",
-    category: "Contact",
-    industry: "Nonprofit / Charity",
-  },
-];
-
-/* -----------------------------
-   Component
------------------------------ */
+function safeLower(s: unknown) {
+  return typeof s === "string" ? s.toLowerCase() : "";
+}
 export default function TemplatesClient() {
   const [selectedIndustry, setSelectedIndustry] =
     useState<(typeof INDUSTRY_FILTERS)[number]>("All");
@@ -418,7 +145,9 @@ export default function TemplatesClient() {
     const normIndustry = (raw: string) => INDUSTRY_GROUPS[raw] ?? raw;
     const normCategory = (raw: string) => CATEGORY_GROUPS[raw] ?? raw;
 
-    return TEMPLATES.filter((t) => {
+    const q = safeLower(searchTerm);
+
+    return (TEMPLATES as MarketingTemplate[]).filter((t) => {
       const iGroup = normIndustry(t.industry);
       const cGroup = normCategory(t.category);
 
@@ -426,9 +155,13 @@ export default function TemplatesClient() {
         selectedIndustry === "All" || iGroup === selectedIndustry;
       const matchesCategory =
         selectedCategory === "All" || cGroup === selectedCategory;
-      const matchesSearch = t.title
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase());
+
+      const matchesSearch =
+        !q ||
+        safeLower(t.title).includes(q) ||
+        safeLower(t.description).includes(q) ||
+        safeLower(t.category).includes(q) ||
+        safeLower(t.industry).includes(q);
 
       return matchesIndustry && matchesCategory && matchesSearch;
     });
@@ -463,7 +196,7 @@ export default function TemplatesClient() {
                 </div>
               </div>
 
-              {/* Industry (condensed) */}
+              {/* Industry */}
               <div className="mb-4">
                 <label className="label">Industry</label>
                 <div className="grid" style={{ gap: ".5rem" }}>
@@ -489,7 +222,7 @@ export default function TemplatesClient() {
                 </div>
               </div>
 
-              {/* Use Case (condensed) */}
+              {/* Use Case */}
               <div>
                 <label className="label">Use Case</label>
                 <div className="grid" style={{ gap: ".5rem" }}>
@@ -524,22 +257,45 @@ export default function TemplatesClient() {
             {filtered.map((t) => (
               <article key={t.id} className="tpl-card">
                 <div className="tpl-card__hero">
+                  {t.featured ? (
+                    <div className="tpl-card__featured">Featured</div>
+                  ) : null}
+
                   <div>
-                    <div className="tpl-card__icon">📄</div>
+                    <div className="tpl-card__icon">{t.icon ?? "📄"}</div>
                     <h4 className="tpl-card__title">{t.title}</h4>
                   </div>
                 </div>
 
                 <div className="tpl-card__meta">
                   <span className="badge--pill">{t.industry}</span>
-                  <div className="text-sm text-muted mt-2">
-                    {t.category} template
+
+                  <p className="tpl-card__desc">
+                    {t.description ?? `${t.category} template`}
+                  </p>
+
+                  <div className="tpl-badges">
+                    <span className="badge--pill badge--secondary">
+                      {t.category}
+                    </span>
+
+                    <span className="badge--pill badge--accent">
+                      {t.renderer === "chat" ? "Conversational" : "Classic"}
+                    </span>
+
+                    <span className="badge--pill badge--secondary">
+                      {Array.isArray(t.fields) ? t.fields.length : 0} fields
+                    </span>
                   </div>
                 </div>
 
                 <div className="tpl-card__footer">
-                  {/* full-width & centered per your styles */}
-                  <button className="btn btn--primary">Use Template</button>
+                  <form action={createFormFromMarketingTemplate}>
+                    <input type="hidden" name="templateId" value={t.id} />
+                    <button className="btn btn--primary" type="submit">
+                      Use Template
+                    </button>
+                  </form>
                 </div>
               </article>
             ))}

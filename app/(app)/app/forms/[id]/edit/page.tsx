@@ -18,17 +18,10 @@ import type { Field } from "@/types/form";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-/**
- * Your Form.fields is Json in Prisma.
- * These helpers keep TS happy and avoid accidental non-array shapes.
- */
 function readFields(value: unknown): Field[] {
-  if (!Array.isArray(value)) return [];
-  return value as Field[];
+  return Array.isArray(value) ? (value as Field[]) : [];
 }
-
 function writeFields(fields: Field[]): Prisma.InputJsonValue {
-  // Prisma expects InputJsonValue for Json columns
   return fields as unknown as Prisma.InputJsonValue;
 }
 
@@ -42,7 +35,6 @@ export default async function EditFormPage({
   const user = await requireUser();
   if (!user) redirect("/signin");
 
-  // ✅ include settings relation so `form.settings` exists
   const form = await prisma.form.findUnique({
     where: { id },
     include: { settings: true },
@@ -61,17 +53,10 @@ export default async function EditFormPage({
     const id = String(formData.get("id") ?? "");
     const title = String(formData.get("title") ?? "").trim();
     const slugRaw = String(formData.get("slug") ?? "").trim();
-    const renderer = String(formData.get("renderer") ?? "classic") as
-      | "classic"
-      | "chat";
 
     if (!id || !title) throw new Error("Missing required fields.");
 
-    const existing = await prisma.form.findUnique({
-      where: { id },
-      include: { settings: true },
-    });
-
+    const existing = await prisma.form.findUnique({ where: { id } });
     if (!existing) notFound();
     if (existing.ownerId !== authed.id) throw new Error("Unauthorized");
 
@@ -84,21 +69,7 @@ export default async function EditFormPage({
 
     await prisma.form.update({
       where: { id },
-      data: {
-        title,
-        slug: nextSlug,
-        settings: {
-          upsert: {
-            create: {
-              renderer,
-              successMessage:
-                existing.settings?.successMessage ??
-                "Thanks! We received your response.",
-            },
-            update: { renderer },
-          },
-        },
-      },
+      data: { title, slug: nextSlug },
     });
 
     revalidatePath(`/app/forms/${id}/edit`);
@@ -116,9 +87,7 @@ export default async function EditFormPage({
     const type = String(formData.get("type") ?? "text") as Field["type"];
     const required = Boolean(formData.get("required"));
 
-    if (!id || !label || !name) {
-      throw new Error("Label and name are required.");
-    }
+    if (!id || !label || !name) throw new Error("Label and name are required.");
 
     const existing = await prisma.form.findUnique({ where: { id } });
     if (!existing) notFound();
@@ -154,7 +123,6 @@ export default async function EditFormPage({
 
     const id = String(formData.get("id") ?? "");
     const fieldId = String(formData.get("fieldId") ?? "");
-
     if (!id || !fieldId) return;
 
     const existing = await prisma.form.findUnique({ where: { id } });
@@ -181,7 +149,6 @@ export default async function EditFormPage({
     const id = String(formData.get("id") ?? "");
     const fieldId = String(formData.get("fieldId") ?? "");
     const dir = Number(formData.get("dir")); // -1 up, +1 down
-
     if (!id || !fieldId || !Number.isFinite(dir)) return;
 
     const existing = await prisma.form.findUnique({ where: { id } });
@@ -206,11 +173,17 @@ export default async function EditFormPage({
   }
 
   return (
-    <main className="mx-auto max-w-4xl space-y-10 px-6 py-10">
+    <main className="mx-auto max-w-5xl space-y-8 px-6 py-10">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Edit form</h1>
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Edit form</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Update your form metadata and manage fields.
+          </p>
+        </div>
+
         <a
-          className="text-sm underline"
+          className="text-sm text-muted-foreground underline hover:text-foreground"
           href={`/forms/${form.slug}`}
           target="_blank"
           rel="noreferrer">
@@ -219,50 +192,55 @@ export default async function EditFormPage({
       </div>
 
       {/* Meta */}
-      <Card>
-        <CardContent className="p-6">
-          <form
-            action={updateMeta}
-            className="grid grid-cols-1 gap-6 md:grid-cols-3">
-            <input type="hidden" name="id" value={form.id} />
+      <form
+        action={updateMeta}
+        className="grid grid-cols-1 gap-6 md:grid-cols-6">
+        <input type="hidden" name="id" value={form.id} />
 
-            <div className="space-y-2 md:col-span-1">
-              <Label htmlFor="title">Title</Label>
-              <Input
-                id="title"
-                name="title"
-                defaultValue={form.title}
-                required
-              />
-            </div>
+        {/* Title */}
+        <div className="space-y-2 md:col-span-2">
+          <Label htmlFor="title">Title</Label>
+          <Input id="title" name="title" defaultValue={form.title} required />
+        </div>
 
-            <div className="space-y-2 md:col-span-1">
-              <Label htmlFor="slug">Slug</Label>
+        {/* Form URL */}
+        <div className="space-y-2 md:col-span-3">
+          <Label htmlFor="slug">Form URL</Label>
+
+          {/* Input + button inline on md+ */}
+          <div className="flex flex-col gap-3 md:flex-row md:items-center">
+            <div className="flex-1">
               <Input id="slug" name="slug" defaultValue={form.slug} />
             </div>
 
-            <div className="md:col-span-1" />
+            <Button
+              className="bg-brand-gradient hover:opacity-95 md:h-10 md:px-6"
+              type="submit">
+              Save
+            </Button>
+          </div>
 
-            <div className="md:col-span-3">
-              <Button
-                className="bg-brand-gradient hover:opacity-95"
-                type="submit">
-                Save
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+          <p className="text-xs text-muted-foreground">
+            You can customize the last part of the link.{" "}
+            <code className="text-foreground">/forms/{form.slug}</code>
+          </p>
+        </div>
+      </form>
 
       {/* Fields */}
-      <Card>
+      <Card className="border border-border/60 shadow-sm">
         <CardContent className="space-y-6 p-6">
-          <h2 className="text-xl font-semibold">Fields</h2>
+          <div>
+            <h2 className="text-xl font-semibold">Fields</h2>
+            <p className="text-sm text-muted-foreground">
+              Add, reorder, and remove fields.
+            </p>
+          </div>
 
           {/* Add field */}
           <form
             action={addField}
-            className="grid grid-cols-1 gap-3 md:grid-cols-6">
+            className="grid grid-cols-1 gap-4 md:grid-cols-6 items-end rounded-xl border border-border/60 bg-muted/20 p-4">
             <input type="hidden" name="id" value={form.id} />
 
             <div className="space-y-1 md:col-span-2">
@@ -280,7 +258,7 @@ export default async function EditFormPage({
               <select
                 id="type"
                 name="type"
-                className="h-10 w-full rounded-md border px-3">
+                className="h-10 w-full rounded-md border border-border/60 bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))/0.25]">
                 <option value="text">text</option>
                 <option value="email">email</option>
                 <option value="tel">tel</option>
@@ -292,12 +270,17 @@ export default async function EditFormPage({
               </select>
             </div>
 
-            <div className="flex items-end gap-2 md:col-span-1">
-              <label className="flex items-center gap-2">
-                <input type="checkbox" name="required" />{" "}
-                <span className="text-sm">Required</span>
+            <div className="flex items-center justify-end gap-2 md:col-span-1">
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" name="required" />
+                Required
               </label>
-              <Button type="submit">Add</Button>
+
+              <Button
+                type="submit"
+                className="bg-brand-gradient hover:opacity-95">
+                Add
+              </Button>
             </div>
           </form>
 
@@ -311,22 +294,24 @@ export default async function EditFormPage({
               fields.map((f, i) => (
                 <div
                   key={f.id}
-                  className="flex items-center justify-between rounded-md border p-3">
-                  <div className="flex min-w-0 items-center gap-3">
-                    <span className="w-5 text-right text-xs text-muted-foreground">
+                  className="flex items-center justify-between gap-4 rounded-xl border border-border/60 bg-card p-4 shadow-soft">
+                  <div className="flex min-w-0 items-start gap-3">
+                    <span className="mt-0.5 w-6 text-right text-xs text-muted-foreground">
                       {i + 1}.
                     </span>
-                    <div className="truncate">
-                      <div className="text-sm font-medium">{f.label}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {f.type} · name=<code>{f.name}</code>{" "}
+                    <div className="min-w-0">
+                      <div className="truncate text-sm font-medium">
+                        {f.label}
+                      </div>
+                      <div className="mt-0.5 text-xs text-muted-foreground">
+                        {f.type} · name=
+                        <code className="text-foreground">{f.name}</code>{" "}
                         {f.required ? "· required" : ""}
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    {/* move up */}
+                  <div className="flex shrink-0 items-center gap-2">
                     <form action={moveField}>
                       <input type="hidden" name="id" value={form.id} />
                       <input type="hidden" name="fieldId" value={f.id} />
@@ -336,7 +321,6 @@ export default async function EditFormPage({
                       </Button>
                     </form>
 
-                    {/* move down */}
                     <form action={moveField}>
                       <input type="hidden" name="id" value={form.id} />
                       <input type="hidden" name="fieldId" value={f.id} />
@@ -349,7 +333,6 @@ export default async function EditFormPage({
                       </Button>
                     </form>
 
-                    {/* remove */}
                     <form action={removeField}>
                       <input type="hidden" name="id" value={form.id} />
                       <input type="hidden" name="fieldId" value={f.id} />
